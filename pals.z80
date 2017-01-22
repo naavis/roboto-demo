@@ -1,0 +1,299 @@
+INCLUDE "RGBGRAFX.INC"
+
+INCLUDE "HARDWARE.INC"
+INCLUDE "INCDEC.INC"
+INCLUDE "DEBUGMSG.INC"
+
+; some routines	by Jeff	Frohwein, used with permission
+
+SECTION	"RGBG_CONVERT_COLORS",HOME
+
+RGBG_ConvertColor15to24::
+;input:
+;D = high byte
+;E = low byte
+;output:
+;H = Blue
+;L = Green
+;A = Red
+
+	ld	a,e
+
+	srl	d
+	rr	e
+	srl	d
+	rr	e
+	ld	h,d
+
+	srl	e
+	srl	e
+	srl	e
+	ld	l,e
+
+	and	$1f
+	ret
+
+RGBG_ConvertColor24to15::
+;Input:
+;H = Blue
+;L = Green
+;A = Red
+;Output:
+; D = high byte
+; E = low byte
+
+	rlca
+	rlca
+	rlca
+	ld	e,a
+	srl	l
+	rr	e
+	srl	l
+	rr	e
+	srl	l
+	rr	e
+
+	ld	a,h
+	add	a
+	add	a
+	add	l
+	ld	d,a
+
+	ret
+
+;RGBG_SetDefPals
+
+SECTION "RGBG_SetDefPals",HOME
+
+RGBG_SetDefPals::
+
+IF RGBG_DMG
+	ld A,%11100100 ;black, dk. gray, lt. gray, white
+	ld [rBGP],A
+	ld [rOBP0],A
+	ld [rOBP1],A
+ENDC
+
+IF RGBG_GBC
+	ld B,7 ;number of 'call RGBG_SetGBCPals' to do
+.setpals
+	sla B
+	sla B
+	
+	ld HL,RGBG_GBCDefPal
+	ld C,4
+	ld A,RGBG_BKG_PALS
+	call RGBG_SetGBCPals
+	
+	ld HL,RGBG_GBCDefPal
+	ld C,4
+	ld A,RGBG_SPR_PALS
+	call RGBG_SetGBCPals
+	
+	sra B
+	sra B
+	
+	dec B
+	ld A,255
+	cp B  
+	jp nz, .setpals
+ENDC
+	ret
+	
+IF RGBG_GBC
+RGBG_GBCDefPal::
+	;GBC pallette data
+	RGB 31,31,31
+	RGB 20,20,20
+	RGB 10,10,10
+	RGB 0,0,0
+ENDC	
+
+SECTION "RGBG_SET_GBC_PALS",HOME
+RGBG_SetGBCPals::
+;input:
+;A  = 0 for bkg, 1 for sprite
+;B  = first color (first pal*4 + 1st color in pal)
+;C  = # of colors
+;HL = pointer to palette data
+;output:
+;A  = x
+;B  = B
+;C  = 0
+;DE = points to BCPD or OCPD
+;HL = points to last byte of pal. data + 1
+
+	;figure if we're doing spr or bkg sprites
+	cp 0
+	jp z, .bkg
+	;spr pals
+	ld DE, rOCPS ;point DE to the spr pal register
+	jp .endif
+.bkg	ld DE, rBCPS ;point DE to the bkg pal register
+.endif
+	
+	;set up the CPS register.  since it's set to autoincrement,
+	;we don't need to worry about it again
+	ld A,B
+	sla A
+	add $80
+	ld [DE],A
+	inc DE
+	
+	;how many bytes worth of palletes do we need to copy
+	sla C
+	
+.copypal
+	ld A,[HL+]
+	vld [DE],A ;we write to the same register everytime, so don't inc
+	dec C
+	jp nz, .copypal
+	
+	ret
+
+SECTION "RGBG_FILL_GBC_PALS",HOME
+RGBG_FillGBCPals::
+;input:
+;HL = color to fill pals with
+
+	;if the msb of the color is set, there are problems
+	ld A,$7F
+	and H
+	ld H,A
+
+	ld A,%10000000
+	ld [rBCPS],A
+	ld [rOCPS],A
+	
+	ld B,8*4
+
+.fillpals
+	ld A,L
+	vld [rBCPD],A
+	ld [rOCPD],A
+	
+	ld A,H
+	ld [rBCPD],A
+	ld [rOCPD],A
+	
+	dec B
+	jp nz, .fillpals
+	
+	ret
+
+SECTION "RGBG_INVERT_PALS",HOME
+
+RGBG_InvertGBCPals::
+;input:
+;B  = # of colors
+;DE = input pals
+;HL = output pal
+
+.invertpals
+	
+	push DE
+	ld A,[DE]
+	inc DE
+	ld C,A ;goes in E
+	ld A,[DE]
+	ld D,A
+	ld E,C
+	
+	push HL
+	call RGBG_ConvertColor15to24
+	
+	ld C,A
+	
+	ld A,31
+	sub H
+	ld H,A
+	
+	ld A,31
+	sub L
+	ld L,A
+	
+	ld A,31
+	sub C
+	
+	call RGBG_ConvertColor24to15
+		
+	pop HL
+	
+	ld A,E
+	ld [HL+],A
+	ld A,D
+	ld [HL+],A
+	
+	pop DE
+	inc DE
+	inc DE
+		
+	dec B
+	jp nz, .invertpals
+	
+	ret
+	
+SECTION "RGBG_GRAYSCALE_PALS",HOME
+
+RGBG_GrayscaleGBCPals::
+;input:
+;B  = # of colors
+;DE = input pals
+;HL = output pal
+
+.invertpals
+	
+	push DE
+	ld A,[DE]
+	inc DE
+	ld C,A ;goes in E
+	ld A,[DE]
+	ld D,A
+	ld E,C
+	
+	push HL
+	call RGBG_ConvertColor15to24
+	
+	ld C,A
+	xor A,A
+	
+	sra C
+	add C ;A =red/2
+	add C ;A =red/2 x 2
+	add C ;A =red/2 x 3
+	
+	ld C,H
+	add C ;A =red/2 x 3 + green/2 x 2
+	add C ;A =red/2 x 3 + green/2 x 4
+	add C ;A =red/2 x 3 + green/2 x 6
+	
+	sra L
+	ld C,L
+	add C ;A =red/2 x 3 + green/2 x 6 + blue/2
+	
+	ld C,0
+.loop	inc C
+	sub 5
+	jp nc, .loop
+	ld A,C
+	
+	ld H,A
+	ld L,A	
+	
+	call RGBG_ConvertColor24to15
+		
+	pop HL
+	
+	ld A,E
+	ld [HL+],A
+	ld A,D
+	ld [HL+],A
+	
+	pop DE
+	inc DE
+	inc DE
+		
+	dec B
+	jp nz, .invertpals
+	
+	ret

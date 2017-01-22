@@ -1,0 +1,125 @@
+INCLUDE "RGBGRAFX.INC"
+
+INCLUDE "HARDWARE.INC"
+INCLUDE "INCDEC.INC"
+INCLUDE "DEBUGMSG.INC"
+
+
+
+
+SECTION "RGBG_LoadTiles",HOME
+
+RGBG_LoadTiles::
+;input:
+; BC = Source tileset
+; D  = # of tiles to copy
+; E  = dest. tile offset 
+; references 'RGBG_tileset'
+
+;add 16*dest. offset to the dest. tileset
+	;load E*16 into BC
+	swap E
+	
+	ld A,E
+	and $0F
+	ld H,A
+	
+	ld A,E
+	and $F0
+	ld L,A
+	
+	;add pointer to the dest. tileset
+	ld A,[RGBG_tileset]
+	add A,H
+	ld H,A
+	
+	ld A,16
+	ld E,A
+	
+.begin	ld A,[BC]
+	inc BC
+	vld [HL+],A
+	dec E
+	jr nz, .begin
+	
+	ld A,16
+	ld E,A
+	dec D
+	jr nz, .begin
+	
+	ret
+	
+SECTION "RGBG_RotateTileRight",HOME
+
+RGBG_RotateTileRight::
+;input:
+; A=tile to rotate 
+; references 'RGBG_tileset'
+;output
+;A = last byte of tile
+;B = SWAP(B)
+;D = 0
+;HL points to last byte of tile+1
+
+;point HL to the tile
+	swap B
+	
+	ld A,B
+	and $0F
+	ld H,A
+	
+	ld A,B
+	and $F0
+	ld L,A
+	
+	ld A,[RGBG_tileset]
+	add A,H
+	ld H,A
+	
+	ld D,16
+.rotate vld A,[HL]
+	rrc A
+	vld [HL+],A
+	
+	dec D
+	jp nz, .rotate
+	
+	ret
+	
+	
+SECTION "RGBG_RotateTileLeft",HOME
+
+RGBG_RotateTileLeft::
+;input:
+; A=tile to rotate 
+; references 'RGBG_tileset'
+;output
+;A = last byte of tile
+;B = SWAP(B)
+;D = 0
+;HL points to last byte of tile+1
+
+;point HL to the tile
+	swap B
+	
+	ld A,B
+	and $0F
+	ld H,A
+	
+	ld A,B
+	and $F0
+	ld L,A
+	
+	ld A,[RGBG_tileset]
+	add A,H
+	ld H,A
+	
+	ld D,16
+.rotate vld A,[HL]
+	rlc A
+	vld [HL+],A
+	
+	dec D
+	jp nz, .rotate
+	
+	ret

@@ -1,0 +1,166 @@
+INCLUDE "RGBGRAFX.INC"
+
+INCLUDE "HARDWARE.INC"
+INCLUDE "INCDEC.INC"
+INCLUDE "DEBUGMSG.INC"
+
+;RGBG_SetTileMap
+;input
+;BC = source tilemap
+;H  = y
+;L  = x
+;D  = height
+;E  = width
+;uses 'RGBG_tilemap' for dest. tilemap
+
+SECTION "RGBG_TileMapVars",BSS
+RGBG_bytes_to_next_row	DS	1 ;INTERNAL USE ONLY
+RGBG_map_width		DS	1 ;INTERNAL USE ONLY
+
+SECTION "RGBG_SetTileMap",HOME
+
+RGBG_SetTileMap::
+	
+	call RGBG_XYToTileMap	
+	
+	;swap BC and HL
+	push BC
+	ld B,H
+	ld C,L
+	pop HL
+	
+	ld A,32
+	sub E
+	ld [RGBG_bytes_to_next_row],A
+	
+	ld A,E
+	ld [RGBG_map_width],A
+	
+.begin	ld A,[RGBG_map_offset]
+	add a,[HL]
+	inc HL
+	vld [BC],A
+	inc BC
+	
+	;done with this row?
+	dec E
+	jr nz,.begin
+	
+	;done all together?
+	dec D
+	jr z,.done
+	
+	;restore the map width
+	ld A,[RGBG_map_width]
+	ld E,A
+	
+	;jump to the next row
+	ld A,[RGBG_bytes_to_next_row]
+	add C
+	ld C,A
+	ld A,B
+	adc 0
+	ld B,A
+	
+	jr .begin
+
+.done	ret
+
+SECTION "RGBG_FillTileMap",HOME
+
+RGBG_FillTileMap::
+;input
+;B  = tile to fill with
+;H  = y
+;L  = x
+;D  = height
+;E  = width
+;uses 'RGBG_tilemap' for dest. tilemap
+	
+	call RGBG_XYToTileMap
+	
+	ld A,32
+	sub E
+	ld [RGBG_bytes_to_next_row],A
+	
+	ld A,E
+	ld [RGBG_map_width],A
+	
+.begin	ld A,B
+	vld [HL+],A
+	
+	;done with this row?
+	dec E
+	jr nz,.begin
+	
+	;done all together?
+	dec D
+	jr z,.done
+	
+	;restore the map width
+	ld A,[RGBG_map_width]
+	ld E,A
+	
+	;jump to the next row
+	ld A,[RGBG_bytes_to_next_row]
+	add L
+	ld L,A
+	ld A,H
+	adc 0
+	ld H,A
+	
+	jr .begin
+
+.done	ret
+
+SECTION "RGBG_SetTile",HOME
+
+RGBG_SetTile::
+;input
+;A  = tile
+;H  = y
+;L  = x
+;uses 'RGBG_tilemap' for dest. tilemap
+	
+	push AF
+	
+	call RGBG_XYToTileMap
+
+	pop AF
+	vld [HL],A
+	ret
+	
+SECTION "RGBG_XYToTileMap",HOME
+
+RGBG_XYToTileMap::
+;input
+;H  = y
+;L  = x
+;uses 'RGBG_tilemap' for dest. tilemap
+;output:
+;HL = a pointer to (x,y) on the tilemap
+;A  = [RGBG_tilemap]
+
+;create pointer to tilemap
+	
+	;we need to go from:
+	;HL = 01234567|89ABCDEF to
+	;HL = XXX01234|567BCDEF
+	
+	ld A,H		; A = 01234567
+	rlc A		; A = 12345670
+	swap A		; A = 56701234
+	push AF
+	and %00011111	; A = XXX01234
+	ld H,A		; H = XXX01234
+	pop AF		; A = 56701234
+	and %11100000	; A = 657XXXXX
+	add A,L		; A = 567BCDEF
+	ld L,A		; L = 567BCDEF
+			; HL = XXX01234|567ABCDEF
+	
+	;now, point that to VRAM
+	ld A,[RGBG_tilemap]
+	add H
+	ld H,A
+	ret

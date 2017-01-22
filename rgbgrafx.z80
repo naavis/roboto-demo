@@ -1,0 +1,33 @@
+INCLUDE "RGBGRAFX.INC"
+
+INCLUDE "HARDWARE.INC"
+INCLUDE "INCDEC.INC"
+INCLUDE "DEBUGMSG.INC"
+
+SECTION "RGBG_Variables",BSS
+
+RGBG_tilemap::		DS 1
+RGBG_tileset::		DS 1
+RGBG_map_offset::	DS 1
+RGBG_update_sprites::	DS 1
+
+SECTION "RGBG_ScreenOff",HOME
+RGBG_ScreenOff::
+        ld      hl,rLCDC
+        bit     7,[hl]          ; Is LCD already off?
+        ret     z               ; yes, exit
+
+        ld      a,[rIE]
+        push    af
+        res     0,a
+        ld      [rIE],a         ; Disable vblank interrupt if enabled
+
+.loop:  ld      a,[rLY]         ; Loop until in first part of vblank
+        cp      145
+        jr      nz,.loop
+
+        res     7,[hl]          ; Turn the screen off
+
+        pop     af
+        ld      [rIE],a         ; Restore the state of vblank interrupt
+        ret

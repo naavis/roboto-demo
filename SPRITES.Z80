@@ -1,0 +1,229 @@
+INCLUDE "INCDEC.INC"
+INCLUDE "RGBGRAFX.INC"
+INCLUDE "HARDWARE.INC"
+
+SECTION "RGBG_OAM",BSS[$DF00] ;must be aligned to $100 bytes.
+
+RGBG_OAM::	DS 40*4
+
+SECTION "RGBG_SetSpriteTile",HOME
+
+RGBG_SetSpriteTile::
+
+;RGBG_SetSpriteTile
+;input:
+; A = sprite
+; B = tile
+;destroys A, HL
+
+;point HL to the sprite in (fake) OAM
+	ld HL,RGBG_OAM
+	sla A
+	sla A
+	add A,2
+	ld L,A
+	
+	ld [HL],B
+
+	ld A,1
+	ld [RGBG_update_sprites],A
+
+	ret
+
+SECTION "RGBG_SetSpriteProp",HOME
+
+RGBG_SetSpriteProp::
+;input:
+; A = sprite
+; B = prop byte
+;destroys A, HL
+
+;point HL to the sprite in (fake) OAM
+	ld HL,RGBG_OAM
+	sla A
+	sla A
+	add A,3
+	ld L,A
+	
+	ld [HL],B
+	
+	ret
+		
+SECTION "RGBG_SetSpritePos",HOME
+
+RGBG_SetSpritePos::
+;input:
+; A = sprite
+; B = X
+; C = Y
+;destroys A, HL
+
+;point HL to the sprite in (fake) OAM
+	ld HL,RGBG_OAM
+	sla A
+	sla A
+	ld L,A
+	
+;set the y coordinate
+	ld [HL],C
+	
+	inc HL
+
+;set the x coordinate
+	ld [HL],B
+
+	ld A,1
+	ld [RGBG_update_sprites],A
+
+	ret
+
+SECTION "RGBG_GetSpriteTile",HOME
+
+RGBG_GetSpriteTile::
+;output:
+; A = tile
+;input:
+; A = sprite
+;destroys HL
+
+;point HL to the sprite in (fake) OAM
+	ld HL,RGBG_OAM
+	sla A
+	sla A
+	add A,2
+	ld L,A
+	
+	ld [HL],B
+
+	ld A,1
+	ld [RGBG_update_sprites],A
+
+	ret	
+
+SECTION "RGBG_GetSpriteProp",HOME
+
+RGBG_GetSpriteProp::
+;output
+; A = prop byte
+;input:
+; A = sprite
+;destroys HL
+
+;point HL to the sprite in (fake) OAM
+	ld HL,RGBG_OAM
+	sla A
+	sla A
+	add A,3
+	ld L,A
+	
+	ld A,[HL]
+	
+	ret
+
+SECTION "RGBG_GetSpritePos",HOME
+
+RGBG_GetSpritePos::
+;input:
+; A = sprite
+;output
+; B = X
+; C = Y
+;destroys A,HL
+
+;point HL to the sprite in (fake) OAM
+	ld HL,RGBG_OAM
+	sla A
+	sla A
+	ld L,A
+	
+;get the y coordinate
+	ld C,[HL]
+	
+	inc HL
+
+;get the x coordinate
+	ld B,[HL]
+	
+	ret
+	
+SECTION "RGBG_MoveSprite",HOME
+
+RGBG_MoveSprite::
+;input:
+; A = sprite
+; B = X-delta
+; C = Y-delta
+;destroys A, HL
+
+;point HL to the sprite in (fake) OAM
+	ld HL,RGBG_OAM
+	sla A
+	sla A
+	ld L,A
+	
+;set the y coordinate
+	ld A,[HL]
+	add C
+	ld [HL],A
+	
+	inc HL
+
+;set the x coordinate
+	ld A,[HL]
+	add B
+	ld [HL],A
+
+	ld A,1
+	ld [RGBG_update_sprites],A
+
+	ret
+
+SECTION "RGBG_CopyDMARoutine",HOME
+RGBG_CopyDMARoutine::
+;no input
+
+	ld HL,RGBG_DoDMA
+	ld BC,RGBG_DoDMAData
+	ld D,(RGBG_DoDMAData_End-RGBG_DoDMAData)
+
+;This copy the data to hiram
+.copyloop
+	ld A,[BC]
+	inc BC
+	ld [HL+],A
+	dec D
+	jr nz,.copyloop
+	
+
+;This is the DMA routine that needs to be copied to hiram
+RGBG_DoDMAData::
+        ld      a,(RGBG_OAM/256)
+        ld      [rDMA],a
+        ld      a,40
+.loop
+        dec     a
+        jr      nz,.loop
+	xor A,A
+	ld [RGBG_update_sprites],A
+        ret
+RGBG_DoDMAData_End::
+
+SECTION "RGBG_DMARoutine", HRAM
+ 
+;This space is reserved foo the DMA routine.  We can  call it (no input)
+;after the routine is copied here
+
+RGBG_DoDMA::		DS RGBG_DoDMAData_End-RGBG_DoDMAData					      
+
+SECTION "RGBG_ZEROOAM",HOME
+RGBG_ZeroOAM::
+;no input
+	xor A,A
+	ld B,40*4
+	ld HL,RGBG_OAM
+
+.zerooam
+	ld [HL+],A	
+	
+	dec B
+	jp nz, .zerooam
