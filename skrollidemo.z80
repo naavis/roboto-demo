@@ -1,4 +1,5 @@
 INCLUDE "rgbgrafx/rgbgrafx.inc"
+INCLUDE "Hardware.inc"
 INCLUDE "imagedata/skrolli_logo.inc"
 
 Section "Initializer",HOME[$100]
@@ -7,9 +8,6 @@ jp main
 
 Section "MainCode",HOME[$150]
 main:
-; Reset color palette to default
-call RGBG_SetDefPals
-
 ; Initialize RGBGrafx variables
 ld A, $80
 ld [RGBG_tileset], A
@@ -17,6 +15,10 @@ ld A, $98
 ld [RGBG_tilemap], A
 ld A, $00
 ld [RGBG_map_offset], A
+
+; Set all palette colors to black
+ld A, $FF
+ld [rBGP], A
 
 ; Load tile patterns to VRAM
 ld BC, skrolli_tile_data
@@ -31,6 +33,8 @@ ld L, $0
 ld E, skrolli_tile_map_width
 ld D, skrolli_tile_map_height
 call RGBG_SetTileMap
+
+; Reset color palette to default
+call RGBG_SetDefPals
+
 halt
-
-
