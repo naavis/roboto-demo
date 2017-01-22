@@ -7,22 +7,22 @@ rgbasm -o header.o header.z80
 rgbasm -o skrollidemo.o skrollidemo.z80
 @if errorlevel 1 goto error
 
-REM rgbasm -o fades.o FADES.z80
+REM rgbasm -o fades.o rgbgrafx/FADES.z80
 REM @if errorlevel 1 goto error
 
-rgbasm -o maps.o maps.z80
+rgbasm -i rgbgrafx/ -o maps.o rgbgrafx/maps.z80
 @if errorlevel 1 goto error
 
-rgbasm -o pals.o pals.z80
+rgbasm -i rgbgrafx/ -o pals.o rgbgrafx/pals.z80
 @if errorlevel 1 goto error
 
-rgbasm -o rgbgrafx.o rgbgrafx.z80
+rgbasm -i rgbgrafx/ -o rgbgrafx.o rgbgrafx/rgbgrafx.z80
 @if errorlevel 1 goto error
 
 REM rgbasm -o sprites.o sprites.z80
 REM @if errorlevel 1 goto error
 
-rgbasm -o tiles.o tiles.z80
+rgbasm -i rgbgrafx/ -o tiles.o rgbgrafx/tiles.z80
 @if errorlevel 1 goto error
 
 
