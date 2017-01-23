@@ -1,7 +1,7 @@
 @PATH=D:\Software\GB Emulator Stuff\rgbds-0.2.4-win32\rgbds-0.2.4;D:\Software\GB Emulator Stuff\gbt-player-3.0.4\mod2gbt;%PATH%
 
 @echo Converting song MOD to assembly...
-mod2gbt.exe skrolli_anthem.mod skrolli_anthem
+mod2gbt.exe music/skrolli_anthem.mod skrolli_anthem
 
 @echo Compiling...
 rgbasm -o header.o header.z80
