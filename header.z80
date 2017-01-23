@@ -1,55 +1,17 @@
 INCLUDE "Hardware.inc"
 
 Section "CartHeader",HOME[$104]
-; $0104 - $0133: The Nintendo Logo.
-DB $CE, $ED, $66, $66, $CC, $0D, $00, $0B
-DB $03, $73, $00, $83, $00, $0C, $00, $0D
-DB $00, $08, $11, $1F, $88, $89, $00, $0E
-DB $DC, $CC, $6E, $E6, $DD, $DD, $D9, $99
-DB $BB, $BB, $67, $63, $6E, $0E, $EC, $CC
-DB $DD, $DC, $99, $9F, $BB, $B9, $33, $3E
-
-; $0134 - $0143: Cart title
-DB "SKROLLI    "
-
-; $013F-$0142: Manufacturer code
-DB "NAAV"
-
-; $0143: CGB Compatibility flag
-DB $00
-
-; $0144-$0145: New licensee code
-DB "OK"
-
-; $0146: SGB Compatibility Flag
-DB $00
-
-; $0147: Cartride type
-DB CART_ROM
-
-; $0148: ROM size
-; $00 means 32K
-DB $00
-
-; $0149: RAM size
-DB CART_RAM_NONE
-
-; $014A: Destination code
-; $00 is Japanese, $01 is international
-DB $01
-
-; $014B: Old licensee code
-; $33 means new code is used
-DB $33
-
-; $014C: ROM version number
-DB $00
-
-; $014D: Header checksum
-; This will be filled in by rgbfix
-DB $00
-
-; $014E-$014F: Global checksum
-; This will be filled in by rgbfix, although
-; this is not checked by GB at all.
-DB $00, $00
+ NINTENDO_LOGO ; $0104 - $0133: The Nintendo Logo.
+DB "SKROLLI    " ; $0134 - $0143: Cart title
+DB "NAAV" ; $013F-$0142: Manufacturer code
+DB $00 ; $0143: CGB Compatibility flag
+DB "OK" ; $0144-$0145: New licensee code
+DB $00 ; $0146: SGB Compatibility Flag
+DB CART_ROM ; $0147: Cartride type
+DB $00 ; $0148: ROM size, $00 means 32K
+DB CART_RAM_NONE ; $0149: RAM size
+DB $01 ; $014A: Destination code, $00 is Japanese, $01 is international
+DB $33 ; $014B: Old licensee code, $33 means new code is used
+DB $00 ; $014C: ROM version number
+DB $00 ; $014D: Header checksum, will be filled in by rgbfix
+DB $00, $00 ; $014E-$014F: Global checksum, will be filled by rgbfix
