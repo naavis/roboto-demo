@@ -1,5 +1,6 @@
-INCLUDE "rgbgrafx/rgbgrafx.inc"
 INCLUDE "Hardware.inc"
+INCLUDE "rgbgrafx/rgbgrafx.inc"
+INCLUDE "gbt_player.inc"
 INCLUDE "imagedata/skrolli_logo.inc"
 
 Section "Initializer",HOME[$100]
@@ -8,6 +9,16 @@ Section "Initializer",HOME[$100]
 
 Section "MainCode",HOME[$150]
 main:
+  di ; Disable interrupts
+  ld SP, $D000 ; Initialize stack pointer
+  ld A, $01
+  ld [rIE], A
+
+  ld DE, SkrolliAnthem_data
+  ld BC, BANK(SkrolliAnthem_data)
+  ld A, $05
+  call gbt_play ; Play song
+
   ; Initialize RGBGrafx variables
   ld A, $80
   ld [RGBG_tileset], A
@@ -37,4 +48,9 @@ main:
   ; Reset color palette to default
   call RGBG_SetDefPals
 
+.loop:
   halt
+  xor A, A
+  ld [rIF], A
+  call gbt_update ; Update player
+  jr .loop
