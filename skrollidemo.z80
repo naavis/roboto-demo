@@ -3,38 +3,38 @@ INCLUDE "Hardware.inc"
 INCLUDE "imagedata/skrolli_logo.inc"
 
 Section "Initializer",HOME[$100]
-nop
-jp main
+  nop
+  jp main
 
 Section "MainCode",HOME[$150]
 main:
-; Initialize RGBGrafx variables
-ld A, $80
-ld [RGBG_tileset], A
-ld A, $98
-ld [RGBG_tilemap], A
-ld A, $00
-ld [RGBG_map_offset], A
+  ; Initialize RGBGrafx variables
+  ld A, $80
+  ld [RGBG_tileset], A
+  ld A, $98
+  ld [RGBG_tilemap], A
+  ld A, $00
+  ld [RGBG_map_offset], A
 
-; Set all palette colors to black
-ld A, $FF
-ld [rBGP], A
+  ; Set all palette colors to black
+  ld A, $FF
+  ld [rBGP], A
 
-; Load tile patterns to VRAM
-ld BC, skrolli_tile_data
-ld D, $FF
-ld E, 0
-call RGBG_LoadTiles
+  ; Load tile patterns to VRAM
+  ld BC, skrolli_tile_data
+  ld D, $FF
+  ld E, 0
+  call RGBG_LoadTiles
 
-; Load tile map
-ld BC, skrolli_map_data
-ld H, $0
-ld L, $0
-ld E, skrolli_tile_map_width
-ld D, skrolli_tile_map_height
-call RGBG_SetTileMap
+  ; Load tile map
+  ld BC, skrolli_map_data
+  ld H, $0
+  ld L, $0
+  ld E, skrolli_tile_map_width
+  ld D, skrolli_tile_map_height
+  call RGBG_SetTileMap
 
-; Reset color palette to default
-call RGBG_SetDefPals
+  ; Reset color palette to default
+  call RGBG_SetDefPals
 
-halt
+  halt
