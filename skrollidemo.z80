@@ -28,6 +28,7 @@ main:
   ld [RGBG_map_offset], A
 
   ; Set all palette colors to black
+  RGBG_WaitForVRAM
   ld A, $FF
   ld [rBGP], A
 
@@ -38,6 +39,7 @@ main:
   call RGBG_LoadTiles
 
   ; Load tile map
+  RGBG_WaitForVRAM
   ld BC, skrolli_map_data
   ld H, $0
   ld L, $0
