@@ -14,8 +14,8 @@ main:
   ld A, $01
   ld [rIE], A
 
-  ld DE, SkrolliAnthem_data
-  ld BC, BANK(SkrolliAnthem_data)
+  ld DE, skrolli_anthem_data
+  ld BC, BANK(skrolli_anthem_data)
   ld A, $05
   call gbt_play ; Play song
 
