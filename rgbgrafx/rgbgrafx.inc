@@ -2,7 +2,7 @@ TRUE		EQU 1
 FALSE		EQU 0
 
 ;Build options
-RGBG_GBC	EQU TRUE	;build with GBC functions?
+RGBG_GBC	EQU FALSE	;build with GBC functions?
 RGBG_DMG	EQU TRUE	;build with DMG functions?
 
 ;RGBGrafx.inc options
@@ -88,7 +88,7 @@ GLOBAL RGBG_first_pal_to_fade_obj
 ;MACROS
 RGBG_WaitNVBL: MACRO
 .waitvbl\@
-	ldh a,[$41] 
+	ldh a,[$41]
 	and 3
 	cp 1
 	jr z, .waitvbl\@
@@ -96,7 +96,7 @@ RGBG_WaitNVBL: MACRO
 
 RGBG_WaitVBL: MACRO
 .waitvbl\@
-	ldh a,[$41] 
+	ldh a,[$41]
 	and 3
 	cp 1
 	jr nz, .waitvbl\@
@@ -114,11 +114,11 @@ ENDC
 ;these are stolen straight from gb4real
 RGBG_WaitForVRAM: MACRO
 ;*********************************
-;* Wait until VRAM is available. * 
+;* Wait until VRAM is available. *
 ;* A is destroyed.               *
 ;*********************************
 
-  ldh a,[$41] 
+  ldh a,[$41]
   and 2
   jr nz,@-4     ; Wait for retrace
 
