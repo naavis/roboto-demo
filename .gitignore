@@ -1,4 +1,5 @@
 *.sym
 *.map
 *.gb
+*.o
 skrolli_anthem.asm
