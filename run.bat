@@ -1,10 +1,12 @@
-@REM Set RGBDSPATH and MOD2GBTPATH accordingly!
-@REM RGBDSPATH is the path to rgbasm, rgblink and rgbfix
-@SET RGBDSPATH=D:\Software\GB Emulator Stuff\rgbds-0.2.4-win32\rgbds-0.2.4\
-@REM MOD2GBTPATH is the path to mod2gbt.exe
-@SET MOD2GBTPATH=D:\Software\GB Emulator Stuff\gbt-player-3.0.4\mod2gbt\
+@REM Set paths accordingly!
+@REM RGBDS_PATH is the path to rgbasm, rgblink and rgbfix
+@SET RGBDS_PATH=D:\Software\GB Emulator Stuff\rgbds-0.2.4-win32\rgbds-0.2.4\
+@REM MOD2GBT_PATH is the path to mod2gbt.exe
+@SET MOD2GBT_PATH=D:\Software\GB Emulator Stuff\gbt-player-3.0.4\mod2gbt\
+@REM BGB_PATH is the path to bgb.exe
+@SET BGB_PATH=D:\Software\GB Emulator Stuff\bgb\
 
-@PATH=%RGBDSPATH%;%MOD2GBTPATH%;%PATH%
+@PATH=%RGBDS_PATH%;%MOD2GBT_PATH%;%BGB_PATH%;%PATH%
 
 @echo Converting song MOD to assembly...
 mod2gbt.exe music/skrolli_anthem.mod skrolli_anthem
@@ -62,7 +64,7 @@ rgbfix.exe -p0 -v skrollidemo.gb
 
 :ready
 echo Starting emulator...
-"D:\Software\GB Emulator Stuff\bgb\bgb.exe" skrollidemo.gb
+bgb.exe skrollidemo.gb
 
 :ending
 @echo Cleaning up...
