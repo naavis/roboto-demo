@@ -11,7 +11,7 @@ Section "MainCode",HOME[$150]
 main:
   di ; Disable interrupts
   ld SP, $D000 ; Initialize stack pointer
-  ld A, $01
+  ld A, IEF_VBLANK
   ld [rIE], A
 
   ld DE, skrolli_anthem_data
