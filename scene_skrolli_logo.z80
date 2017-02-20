@@ -2,6 +2,7 @@ INCLUDE "Hardware.inc"
 INCLUDE "rgbgrafx/rgbgrafx.inc"
 INCLUDE "imagedata/skrolli_logo.inc"
 
+Section "Skrolli Logo",HOME
 scene_skrolli_logo::
   ; Set all palette colors to black for the duration of loading image data
   RGBG_WaitForVRAM
@@ -23,7 +24,7 @@ scene_skrolli_logo::
   ld [RGBG_tilemap], A
 
   ; Set tilemap offset to zero
-  ld A, $00
+  xor A, A
   ld [RGBG_map_offset], A
 
   ; Load tile map
@@ -52,15 +53,31 @@ scene_skrolli_logo::
   or LCDCF_WINON ; Enable window
   or LCDCF_WIN9C00 ; Use tilemap in $9C00-$9FFF for window
   ld [rLCDC], A
-  ; Offset window
-  ; TODO: Animate window to reveal image
-  ld A, 50
-  ld [rWY], A
-  add 7
-  ld [rWX], A
-
 
   ; Reset color palette to default
   RGBG_WaitForVRAM
   call RGBG_SetDefPals
+
+  ; Animate window sliding from left to right
+  xor A, A ; Set A to zero
+  add 7 ; Visible portion of window starts at rWX == 7
+  ld B, A
+.loop
+  xor A, A
+.innerloop
+  ; Busywait to slow sliding window down
+  inc A
+  cp $FF
+  jr nz, .innerloop
+
+  RGBG_WaitVBL
+  ld A, B
+  ld [rWX], A
+  inc A
+  ld B, A
+  cp 166 ; Visible portion of window ends at rWX == 166
+  jr nz, .loop
+
   ret
+
+
