@@ -3,6 +3,9 @@ INCLUDE "rgbgrafx/rgbgrafx.inc"
 INCLUDE "gbt_player/gbt_player.inc"
 INCLUDE "imagedata/skrolli_logo.inc"
 
+Section "V-Blank ISR",HOME[$40]
+  jp VBlank
+
 Section "Initializer",HOME[$100]
   nop
   jp main
@@ -45,7 +48,7 @@ main:
   RGBG_WaitForVRAM
   call RGBG_SetDefPals
 
-  di ; Disable interrupts
+  di ; Disable interrupts while setting them up
   ld SP, $FFFE ; Initialize stack pointer
   ld A, IEF_VBLANK
   ld [rIE], A
@@ -55,10 +58,13 @@ main:
   ld BC, BANK(skrolli_anthem_data)
   ld A, $05
   call gbt_play ; Play song
+  ei; Enable interrupts again
 
 .loop:
   halt
-  xor A, A
-  ld [rIF], A
-  call gbt_update ; Update music player
   jr .loop
+
+
+VBlank:
+  call gbt_update ; Update music player
+  reti
