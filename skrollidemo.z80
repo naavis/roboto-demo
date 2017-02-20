@@ -9,24 +9,28 @@ Section "Initializer",HOME[$100]
 
 Section "MainCode",HOME[$150]
 main:
-  ; Initialize RGBGrafx variables
-  ld A, $80
-  ld [RGBG_tileset], A
-  ld A, $98
-  ld [RGBG_tilemap], A
-  ld A, $00
-  ld [RGBG_map_offset], A
-
-  ; Set all palette colors to black
+  ; Set all palette colors to black for the duration of loading image data
   RGBG_WaitForVRAM
   ld A, $FF
   ld [rBGP], A
 
+  ; Initialize high byte of the tileset address
+  ld A, $80
+  ld [RGBG_tileset], A
   ; Load tile patterns to VRAM
   ld BC, skrolli_tile_data
   ld D, $FF
   ld E, 0
+  RGBG_WaitForVRAM
   call RGBG_LoadTiles
+
+  ; Initialize high byte of the tilemap address
+  ld A, $98
+  ld [RGBG_tilemap], A
+
+  ; Set tilemap offset to zero
+  ld A, $00
+  ld [RGBG_map_offset], A
 
   ; Load tile map
   RGBG_WaitForVRAM
@@ -38,6 +42,7 @@ main:
   call RGBG_SetTileMap
 
   ; Reset color palette to default
+  RGBG_WaitForVRAM
   call RGBG_SetDefPals
 
   di ; Disable interrupts
@@ -45,6 +50,7 @@ main:
   ld A, IEF_VBLANK
   ld [rIE], A
 
+  ; Initialize music
   ld DE, skrolli_anthem_data
   ld BC, BANK(skrolli_anthem_data)
   ld A, $05
@@ -54,5 +60,5 @@ main:
   halt
   xor A, A
   ld [rIF], A
-  call gbt_update ; Update player
+  call gbt_update ; Update music player
   jr .loop
