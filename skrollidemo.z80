@@ -1,6 +1,6 @@
 INCLUDE "Hardware.inc"
 INCLUDE "rgbgrafx/rgbgrafx.inc"
-INCLUDE "gbt_player.inc"
+INCLUDE "gbt_player/gbt_player.inc"
 INCLUDE "imagedata/skrolli_logo.inc"
 
 Section "Initializer",HOME[$100]

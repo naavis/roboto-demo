@@ -28,10 +28,10 @@ rgbasm.exe -i rgbgrafx/ -o rgbgrafx.o rgbgrafx/rgbgrafx.z80
 rgbasm.exe -i rgbgrafx/ -o tiles.o rgbgrafx/tiles.z80
 @if errorlevel 1 goto error
 
-rgbasm.exe -o gbt_player.o gbt_player.asm
+rgbasm.exe -i gbt_player/ -o gbt_player.o gbt_player/gbt_player.asm
 @if errorlevel 1 goto error
 
-rgbasm.exe -o gbt_player_bank1.o gbt_player_bank1.asm
+rgbasm.exe -i gbt_player/ -o gbt_player_bank1.o gbt_player/gbt_player_bank1.asm
 @if errorlevel 1 goto error
 
 rgbasm.exe -o skrolli_anthem.o skrolli_anthem.asm
