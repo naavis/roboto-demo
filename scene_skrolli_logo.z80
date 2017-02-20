@@ -8,7 +8,7 @@ scene_skrolli_logo::
   ld A, $FF
   ld [rBGP], A
 
-  ; Initialize high byte of the tileset address
+  ; Initialize high byte of the tileset starting address
   ld A, $80
   ld [RGBG_tileset], A
   ; Load tile patterns to VRAM
@@ -18,7 +18,7 @@ scene_skrolli_logo::
   RGBG_WaitForVRAM
   call RGBG_LoadTiles
 
-  ; Initialize high byte of the tilemap address
+  ; Initialize high byte of the tilemap starting address
   ld A, $98
   ld [RGBG_tilemap], A
 
@@ -34,6 +34,31 @@ scene_skrolli_logo::
   ld E, skrolli_tile_map_width
   ld D, skrolli_tile_map_height
   call RGBG_SetTileMap
+
+  ; Draw black window on top of background
+  ; Store window tilemap in $9C00-$9FFF
+  ld A, $9C
+  ld [RGBG_tilemap], A
+  ; Tile to fill the area of the map with
+  ; We know the first tile in the Skrolli logo image is black
+  ld B, 0
+  ld H, 0 ; Y-coordinate of upper left corner of the area to set in VRAM
+  ld L, 0 ; X-coordinate of upper left corner of the area to set in VRAM
+  ld D, 32 ; Height of area in VRAM to set
+  ld E, 32 ; Width of area in VRAM to set
+  RGBG_WaitForVRAM
+  call RGBG_FillTileMap
+  ld A, [rLCDC]
+  or LCDCF_WINON ; Enable window
+  or LCDCF_WIN9C00 ; Use tilemap in $9C00-$9FFF for window
+  ld [rLCDC], A
+  ; Offset window
+  ; TODO: Animate window to reveal image
+  ld A, 50
+  ld [rWY], A
+  add 7
+  ld [rWX], A
+
 
   ; Reset color palette to default
   RGBG_WaitForVRAM
