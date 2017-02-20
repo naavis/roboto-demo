@@ -3,7 +3,6 @@ INCLUDE "rgbgrafx/rgbgrafx.inc"
 INCLUDE "imagedata/skrolli_logo.inc"
 
 scene_skrolli_logo::
-  di ; Disable interrupts for the duration of setup
   ; Set all palette colors to black for the duration of loading image data
   RGBG_WaitForVRAM
   ld A, $FF
@@ -39,5 +38,4 @@ scene_skrolli_logo::
   ; Reset color palette to default
   RGBG_WaitForVRAM
   call RGBG_SetDefPals
-  ei ; Enable interrupts again
   ret

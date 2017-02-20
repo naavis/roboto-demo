@@ -31,5 +31,13 @@ main:
 
 
 VBlank:
-  call gbt_update ; Update music player
+  push AF
+  push BC
+  push DE
+  push HL
+  call gbt_update
+  pop HL
+  pop DE
+  pop BC
+  pop AF
   reti
