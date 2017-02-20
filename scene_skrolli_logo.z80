@@ -24,7 +24,7 @@ scene_skrolli_logo::
   ld [RGBG_tilemap], A
 
   ; Set tilemap offset to zero
-  xor A, A
+  xor A
   ld [RGBG_map_offset], A
 
   ; Load tile map
@@ -59,11 +59,11 @@ scene_skrolli_logo::
   call RGBG_SetDefPals
 
   ; Animate window sliding from left to right
-  xor A, A ; Set A to zero
+  xor A ; Set A to zero
   add 7 ; Visible portion of window starts at rWX == 7
   ld B, A
 .loop
-  xor A, A
+  xor A
 .innerloop
   ; Busywait to slow sliding window down
   inc A
