@@ -41,7 +41,7 @@ main:
   call RGBG_SetDefPals
 
   di ; Disable interrupts
-  ld SP, $D000 ; Initialize stack pointer
+  ld SP, $FFFE ; Initialize stack pointer
   ld A, IEF_VBLANK
   ld [rIE], A
 
