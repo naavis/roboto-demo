@@ -9,37 +9,42 @@
 @echo Converting song MOD to assembly...
 mod2gbt.exe music/skrolli_anthem.mod skrolli_anthem
 
+
+@echo Creating build folder...
+@if not exist "build/" mkdir build
+
+
 @echo Compiling...
-rgbasm.exe -o header.o header.z80
+rgbasm.exe -o build/header.o header.z80
 @if errorlevel 1 goto error
 
-rgbasm.exe -o skrollidemo.o skrollidemo.z80
+rgbasm.exe -o build/skrollidemo.o skrollidemo.z80
 @if errorlevel 1 goto error
 
-rgbasm.exe -i rgbgrafx/ -o maps.o rgbgrafx/maps.z80
+rgbasm.exe -i rgbgrafx/ -o build/maps.o rgbgrafx/maps.z80
 @if errorlevel 1 goto error
 
-rgbasm.exe -i rgbgrafx/ -o pals.o rgbgrafx/pals.z80
+rgbasm.exe -i rgbgrafx/ -o build/pals.o rgbgrafx/pals.z80
 @if errorlevel 1 goto error
 
-rgbasm.exe -i rgbgrafx/ -o rgbgrafx.o rgbgrafx/rgbgrafx.z80
+rgbasm.exe -i rgbgrafx/ -o build/rgbgrafx.o rgbgrafx/rgbgrafx.z80
 @if errorlevel 1 goto error
 
-rgbasm.exe -i rgbgrafx/ -o tiles.o rgbgrafx/tiles.z80
+rgbasm.exe -i rgbgrafx/ -o build/tiles.o rgbgrafx/tiles.z80
 @if errorlevel 1 goto error
 
-rgbasm.exe -i gbt_player/ -o gbt_player.o gbt_player/gbt_player.asm
+rgbasm.exe -i gbt_player/ -o build/gbt_player.o gbt_player/gbt_player.asm
 @if errorlevel 1 goto error
 
-rgbasm.exe -i gbt_player/ -o gbt_player_bank1.o gbt_player/gbt_player_bank1.asm
+rgbasm.exe -i gbt_player/ -o build/gbt_player_bank1.o gbt_player/gbt_player_bank1.asm
 @if errorlevel 1 goto error
 
-rgbasm.exe -o skrolli_anthem.o skrolli_anthem.asm
+rgbasm.exe -o build/skrolli_anthem.o skrolli_anthem.asm
 @if errorlevel 1 goto error
 
 
 @echo Linking...
-rgblink.exe -n skrollidemo.sym -m skrollidemo.map -o skrollidemo.gb *.o
+rgblink.exe -n build/skrollidemo.sym -m build/skrollidemo.map -o skrollidemo.gb build/*.o
 @if errorlevel 1 goto error
 
 
@@ -61,4 +66,4 @@ echo Starting emulator...
 
 :ending
 @echo Cleaning up...
-del *.o
+del build\*.o

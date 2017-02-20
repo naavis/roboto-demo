@@ -2,4 +2,5 @@
 *.map
 *.gb
 *.o
+build/
 skrolli_anthem.asm
