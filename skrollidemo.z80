@@ -1,7 +1,8 @@
 INCLUDE "Hardware.inc"
 INCLUDE "gbt_player/gbt_player.inc"
 
-GLOBAL scene_skrolli_logo
+IMPORT scene_skrolli_logo
+IMPORT skrolli_anthem_data
 
 Section "V-Blank ISR",HOME[$40]
   jp VBlank
