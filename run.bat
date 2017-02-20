@@ -35,6 +35,7 @@ rgbasm.exe -o gbt_player_bank1.o gbt_player_bank1.asm
 @if errorlevel 1 goto error
 
 rgbasm.exe -o skrolli_anthem.o skrolli_anthem.asm
+@if errorlevel 1 goto error
 
 
 @echo Linking...
