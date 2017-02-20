@@ -9,16 +9,6 @@ Section "Initializer",HOME[$100]
 
 Section "MainCode",HOME[$150]
 main:
-  di ; Disable interrupts
-  ld SP, $D000 ; Initialize stack pointer
-  ld A, IEF_VBLANK
-  ld [rIE], A
-
-  ld DE, skrolli_anthem_data
-  ld BC, BANK(skrolli_anthem_data)
-  ld A, $05
-  call gbt_play ; Play song
-
   ; Initialize RGBGrafx variables
   ld A, $80
   ld [RGBG_tileset], A
@@ -49,6 +39,16 @@ main:
 
   ; Reset color palette to default
   call RGBG_SetDefPals
+
+  di ; Disable interrupts
+  ld SP, $D000 ; Initialize stack pointer
+  ld A, IEF_VBLANK
+  ld [rIE], A
+
+  ld DE, skrolli_anthem_data
+  ld BC, BANK(skrolli_anthem_data)
+  ld A, $05
+  call gbt_play ; Play song
 
 .loop:
   halt
