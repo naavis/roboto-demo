@@ -2,7 +2,7 @@ INCLUDE "Hardware.inc"
 INCLUDE "rgbgrafx/rgbgrafx.inc"
 INCLUDE "imagedata/skrolli_logo.inc"
 
-Section "Skrolli Logo",HOME
+Section "Skrolli Logo",CODE
 scene_skrolli_logo::
   ; Set all palette colors to black for the duration of loading image data
   RGBG_WaitForVRAM

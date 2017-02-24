@@ -1,6 +1,10 @@
 INCLUDE "Hardware.inc"
 
-Section "Nintendo Logo Slide",HOME
+Section "Nintendo Logo Slide",CODE
 scene_nintendo_logo_slide::
+  ld A, [rIE]
+  ; Enable LCDC interrupt
+  set IEF_LCDC, A
+  ld [rIE], A
   ; TODO: Make Nintendo logo distort and slide down, like Doom logo
   ret

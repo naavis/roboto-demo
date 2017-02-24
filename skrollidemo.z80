@@ -5,8 +5,22 @@ IMPORT scene_nintendo_logo_slide
 IMPORT scene_skrolli_logo
 IMPORT skrolli_anthem_data
 
+GLOBAL VBlank_Address
+GLOBAL LCDC_Address
+
+Section "RST 00",HOME[$00]
+  ; This is called if an interrupt handler address is set to zero.
+  ret
+
+Section "RST 08",HOME[$08]
+  ; Jump to function in HL and return to caller of RST.
+  jp HL
+
 Section "V-Blank ISR",HOME[$40]
   jp VBlank
+
+Section "LCDC ISR",HOME[$48]
+  jp LCDC
 
 Section "Initializer",HOME[$100]
   nop
@@ -14,8 +28,9 @@ Section "Initializer",HOME[$100]
 
 Section "MainCode",HOME[$150]
 main:
-  di ; Disable interrupts while setting them up
   ld SP, $FFFE ; Initialize stack pointer
+  di ; Disable interrupts while setting them up
+  call initialize_interrupts
   ld A, IEF_VBLANK
   ld [rIE], A
 
@@ -35,15 +50,52 @@ main:
   halt
   jr .loop
 
+initialize_interrupts:
+  ; Point all interrupt handlers to $00 so they do nothing.
+  xor A
+  ld HL, VBlank_Address
+  ld [HL+], A
+  ld [HL], A
+  ld HL, LCDC_Address
+  ld [HL+], A
+  ld [HL], A
+  ret
 
 VBlank:
   push AF
   push BC
   push DE
   push HL
+  ld HL, VBlank_Address
+  ld	A, [HL+]
+	ld	H, [HL]
+	ld	L, A
+  ; Call address at HL and return here
+  rst $08
   call gbt_update
   pop HL
   pop DE
   pop BC
   pop AF
   reti
+
+LCDC:
+  push AF
+  push BC
+  push DE
+  push HL
+  ld HL, LCDC_Address
+  ld	A, [HL+]
+	ld	H, [HL]
+	ld	L, A
+  ; Call address at HL and return here
+  rst $08
+  pop HL
+  pop DE
+  pop BC
+  pop AF
+  reti
+
+Section "Interrupt handler addresses",BSS
+VBlank_Address: DS 2
+LCDC_Address: DS 2
