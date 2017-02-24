@@ -1,0 +1,6 @@
+INCLUDE "Hardware.inc"
+
+Section "Nintendo Logo Slide",HOME
+scene_nintendo_logo_slide::
+  ; TODO: Make Nintendo logo distort and slide down, like Doom logo
+  ret

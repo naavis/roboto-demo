@@ -1,6 +1,7 @@
 INCLUDE "Hardware.inc"
 INCLUDE "gbt_player/gbt_player.inc"
 
+IMPORT scene_nintendo_logo_slide
 IMPORT scene_skrolli_logo
 IMPORT skrolli_anthem_data
 
@@ -17,6 +18,10 @@ main:
   ld SP, $FFFE ; Initialize stack pointer
   ld A, IEF_VBLANK
   ld [rIE], A
+
+  ; Distort and slide Nintendo logo away
+  call scene_nintendo_logo_slide
+
   ; Initialize music
   ld DE, skrolli_anthem_data
   ld BC, BANK(skrolli_anthem_data)

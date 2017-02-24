@@ -79,5 +79,3 @@ scene_skrolli_logo::
   jr nz, .loop
 
   ret
-
-
