@@ -34,7 +34,7 @@ LCDC:
   push DE
   push HL
   ld HL, LCDC_Address
-  ; jr interrupt_common
+  jr interrupt_common
 
 interrupt_common:
   ld	A, [HL+]
@@ -69,7 +69,7 @@ set_vblank_interrupt::
 ; BC = function pointer
 set_lcdc_interrupt::
   ld HL, LCDC_Address
-  ; jr interrupt_setter_common
+  jr interrupt_setter_common
 
 interrupt_setter_common:
   di

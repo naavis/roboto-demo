@@ -1,10 +1,81 @@
 INCLUDE "Hardware.inc"
+INCLUDE "rgbgrafx/rgbgrafx.inc"
 
 Section "Nintendo Logo Slide",CODE
 scene_nintendo_logo_slide::
-  ld A, [rIE]
+  ; Initialize variables
+  xor A
+  ld [scene_done], A
+  ld [split_amount], A
+
+  di
   ; Enable LCDC interrupt
-  set IEF_LCDC, A
+  ld A, [rIE]
+  or IEF_LCDC
   ld [rIE], A
-  ; TODO: Make Nintendo logo distort and slide down, like Doom logo
+
+  ; Set V-blank handler
+  ld BC, vblank_interrupt
+  call set_vblank_interrupt
+
+  ; Set LCDC handler
+  ld BC, lcdc_interrupt
+  call set_lcdc_interrupt
+
+  ; Enable coincidence flag to cause an interrupt
+  ; when LY equals LYC
+  ld A, [rSTAT]
+  or STATF_LYC
+  ld [rSTAT], A
+
+  ; Set initial LYC value
+  ld A, 0
+  ld [rLYC], A
+  ei
+.loop:
+  halt
+  ld A, [scene_done]
+  cp 1
+  jr nz, .loop
   ret
+
+vblank_interrupt:
+  RGBG_WaitForVRAM
+  xor A
+  ld [rLYC], A
+  ld A, [split_amount]
+  inc A
+  ld [split_amount], A
+  ; TODO: Erase part of Nintendo logo when it has scrolled out of screen
+  ; TODO: Fade out using palettes
+  ; TODO: Signal program that scene is finished
+  ret
+
+lcdc_interrupt:
+  RGBG_WaitForVRAM
+  ; Check if scanline is odd or even to determine direction
+  ld A, [rLY]
+  and 1
+  jr nz, .odd
+.even:
+  ; On even lines SCX increases
+  ld A, [split_amount]
+  ld [rSCX], A
+  jr .rest
+.odd:
+  ; On odd lines SCX decreases
+  ld A, [split_amount]
+  ld B, A
+  ld A, $FF
+  sub B
+  ld [rSCX], A
+.rest
+  ; Increment LYC on every line
+  ld A, [rLYC]
+  inc A
+  ld [rLYC], A
+  ret
+
+Section "Variables",BSS
+split_amount: DS 1
+scene_done: DS 1
