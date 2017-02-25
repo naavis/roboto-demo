@@ -23,7 +23,6 @@ Section "LCDC ISR",HOME[$48]
   jp LCDC
 
 Section "Initializer",HOME[$100]
-  nop
   jp main
 
 Section "MainCode",HOME[$150]
