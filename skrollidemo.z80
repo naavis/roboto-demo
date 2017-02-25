@@ -1,4 +1,3 @@
-INCLUDE "Hardware.inc"
 INCLUDE "gbt_player/gbt_player.inc"
 
 Section "Initializer",HOME[$100]
@@ -8,8 +7,6 @@ Section "MainCode",HOME[$150]
 main:
   di ; Disable interrupts while setting them up
   call initialize_interrupts
-  ld A, IEF_VBLANK
-  ld [rIE], A
   ei; Enable interrupts again
 
   call scene_nintendo_logo_slide

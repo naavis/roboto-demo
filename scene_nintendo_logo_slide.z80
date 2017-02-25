@@ -46,9 +46,26 @@ vblank_interrupt:
   ld A, [split_amount]
   inc A
   ld [split_amount], A
-  ; TODO: Erase part of Nintendo logo when it has scrolled out of screen
-  ; TODO: Fade out using palettes
-  ; TODO: Signal program that scene is finished
+  ld B, $50
+  cp B
+  jr c, .skip_fade
+  ; Fade out using palettes
+  ld A, [rBGP]
+  ld B, A
+  and %00001111
+  cp $00
+  jr z, .skip_fade
+  ld A, B
+  sub %0100
+  ld [rBGP], A
+.skip_fade:
+  ld A, [split_amount]
+  ld B, $7F
+  cp B
+  jr nz, .return
+  ld A, 1
+  ld [scene_done], A
+.return:
   ret
 
 lcdc_interrupt:

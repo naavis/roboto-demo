@@ -4,6 +4,9 @@ INCLUDE "imagedata/skrolli_logo.inc"
 
 Section "Skrolli Logo",CODE
 scene_skrolli_logo::
+  di
+  call initialize_interrupts
+  ei
   ; Set all palette colors to black for the duration of loading image data
   RGBG_WaitForVRAM
   ld A, $FF
@@ -53,6 +56,11 @@ scene_skrolli_logo::
   or LCDCF_WINON ; Enable window
   or LCDCF_WIN9C00 ; Use tilemap in $9C00-$9FFF for window
   ld [rLCDC], A
+
+  ; Reset background scroll registers
+  xor A
+  ld [rSCX], A
+  ld [rSCY], A
 
   ; Reset color palette to default
   RGBG_WaitForVRAM

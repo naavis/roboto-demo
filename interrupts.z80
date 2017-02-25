@@ -1,4 +1,5 @@
 INCLUDE "gbt_player/gbt_player.inc"
+INCLUDE "Hardware.inc"
 
 GLOBAL VBlank_Address
 GLOBAL LCDC_Address
@@ -59,6 +60,8 @@ initialize_interrupts::
   ld HL, LCDC_Address
   ld [HL+], A
   ld [HL], A
+  ld A, IEF_VBLANK
+  ld [rIE], A
   ret
 
 ; BC = function pointer
