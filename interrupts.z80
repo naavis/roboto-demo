@@ -62,12 +62,12 @@ initialize_interrupts::
   ret
 
 ; BC = function pointer
-set_vblank::
+set_vblank_interrupt::
   ld HL, VBlank_Address
   jr interrupt_setter_common
 
 ; BC = function pointer
-set_lcdc::
+set_lcdc_interrupt::
   ld HL, LCDC_Address
   ; jr interrupt_setter_common
 
