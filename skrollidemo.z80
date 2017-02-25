@@ -66,18 +66,10 @@ VBlank:
   push BC
   push DE
   push HL
-  ld HL, VBlank_Address
-  ld	A, [HL+]
-	ld	H, [HL]
-	ld	L, A
-  ; Call address at HL and return here
-  rst $08
+  ; Update music at V-blank
   call gbt_update
-  pop HL
-  pop DE
-  pop BC
-  pop AF
-  reti
+  ld HL, VBlank_Address
+  jr IRQ_common
 
 LCDC:
   push AF
@@ -85,9 +77,12 @@ LCDC:
   push DE
   push HL
   ld HL, LCDC_Address
+  ; jr IRQ_common
+
+IRQ_common:
   ld	A, [HL+]
-	ld	H, [HL]
-	ld	L, A
+  ld	H, [HL]
+  ld	L, A
   ; Call address at HL and return here
   rst $08
   pop HL
@@ -95,6 +90,7 @@ LCDC:
   pop BC
   pop AF
   reti
+
 
 Section "Interrupt handler addresses",BSS
 VBlank_Address: DS 2
