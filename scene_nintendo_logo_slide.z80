@@ -7,6 +7,7 @@ scene_nintendo_logo_slide::
   xor A
   ld [scene_done], A
   ld [split_amount], A
+  ld [fade_delay], A
 
   di
   ; Enable LCDC interrupt
@@ -46,10 +47,21 @@ vblank_interrupt:
   ld A, [split_amount]
   inc A
   ld [split_amount], A
-  ld B, $50
+  ; Start fade after 20 V-blanks
+  ld B, $20
   cp B
   jr c, .skip_fade
-  ; Fade out using palettes
+  ; Wait 10 V-blanks before each palette change to slow things down.
+  ld A, [fade_delay]
+  cp $10
+  jr z, .delay_over
+  inc A
+  ld [fade_delay], A
+  jr .skip_fade
+.delay_over:
+  ; Execute actual palette change
+  xor A
+  ld [fade_delay], A
   ld A, [rBGP]
   ld B, A
   and %00001111
@@ -59,8 +71,9 @@ vblank_interrupt:
   sub %0100
   ld [rBGP], A
 .skip_fade:
+  ; Set scene_done after $7A V-blanks
   ld A, [split_amount]
-  ld B, $7F
+  ld B, $7A
   cp B
   jr nz, .return
   ld A, 1
@@ -96,3 +109,4 @@ lcdc_interrupt:
 Section "Variables",BSS
 split_amount: DS 1
 scene_done: DS 1
+fade_delay: DS 1
