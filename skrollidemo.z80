@@ -5,6 +5,8 @@ Section "Initializer",HOME[$100]
 
 Section "MainCode",HOME[$150]
 main:
+  xor A
+  ld [music_playing], A
   di ; Disable interrupts while setting them up
   call initialize_interrupts
   ei; Enable interrupts again
@@ -17,6 +19,8 @@ main:
   ld A, $05
   call gbt_play ; Play song
 
+  ld A, $1
+  ld [music_playing], A
   call scene_skrolli_logo
 
 .loop:

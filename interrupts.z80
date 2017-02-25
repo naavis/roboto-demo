@@ -25,7 +25,11 @@ VBlank:
   push DE
   push HL
   ; Update music at V-blank
+  ld A, [music_playing]
+  cp $0
+  jr z, .after_gbt_update
   call gbt_update
+.after_gbt_update:
   ld HL, VBlank_Address
   jr interrupt_common
 
@@ -85,3 +89,4 @@ interrupt_setter_common:
 Section "Interrupt handler addresses",BSS
 VBlank_Address: DS 2
 LCDC_Address: DS 2
+music_playing:: DS 1
