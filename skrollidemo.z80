@@ -1,23 +1,6 @@
 INCLUDE "Hardware.inc"
 INCLUDE "gbt_player/gbt_player.inc"
 
-GLOBAL VBlank_Address
-GLOBAL LCDC_Address
-
-Section "RST 00",HOME[$00]
-  ; This is called if an interrupt handler address is set to zero.
-  ret
-
-Section "RST 08",HOME[$08]
-  ; Jump to function in HL and return to caller of RST.
-  jp HL
-
-Section "V-Blank ISR",HOME[$40]
-  jp VBlank
-
-Section "LCDC ISR",HOME[$48]
-  jp LCDC
-
 Section "Initializer",HOME[$100]
   jp main
 
@@ -44,49 +27,3 @@ main:
 .loop:
   halt
   jr .loop
-
-initialize_interrupts:
-  ; Point all interrupt handlers to $00 so they do nothing.
-  xor A
-  ld HL, VBlank_Address
-  ld [HL+], A
-  ld [HL], A
-  ld HL, LCDC_Address
-  ld [HL+], A
-  ld [HL], A
-  ret
-
-VBlank:
-  push AF
-  push BC
-  push DE
-  push HL
-  ; Update music at V-blank
-  call gbt_update
-  ld HL, VBlank_Address
-  jr IRQ_common
-
-LCDC:
-  push AF
-  push BC
-  push DE
-  push HL
-  ld HL, LCDC_Address
-  ; jr IRQ_common
-
-IRQ_common:
-  ld	A, [HL+]
-  ld	H, [HL]
-  ld	L, A
-  ; Call address at HL and return here
-  rst $08
-  pop HL
-  pop DE
-  pop BC
-  pop AF
-  reti
-
-
-Section "Interrupt handler addresses",BSS
-VBlank_Address: DS 2
-LCDC_Address: DS 2
