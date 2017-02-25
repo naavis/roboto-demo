@@ -50,6 +50,8 @@ IRQ_common:
 
 initialize_interrupts::
   ; Point all interrupt handlers to $00 so they do nothing.
+  ; Disables interrupts, must be manually enabled again.
+  di
   xor A
   ld HL, VBlank_Address
   ld [HL+], A
@@ -59,6 +61,23 @@ initialize_interrupts::
   ld [HL], A
   ret
 
+; BC = function pointer
+set_vblank::
+  ld HL, VBlank_Address
+  jr interrupt_setter_common
+
+; BC = function pointer
+set_lcdc::
+  ld HL, LCDC_Address
+  ; jr interrupt_setter_common
+
+interrupt_setter_common:
+  di
+  ld [HL], C
+  inc HL
+  ld [HL], B
+  ei
+  ret
 
 Section "Interrupt handler addresses",BSS
 VBlank_Address: DS 2
