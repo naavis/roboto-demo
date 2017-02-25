@@ -6,7 +6,6 @@ Section "Initializer",HOME[$100]
 
 Section "MainCode",HOME[$150]
 main:
-  ld SP, $FFFE ; Initialize stack pointer
   di ; Disable interrupts while setting them up
   call initialize_interrupts
   ld A, IEF_VBLANK
