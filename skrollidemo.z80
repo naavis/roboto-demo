@@ -11,6 +11,7 @@ main:
   call initialize_interrupts
   ld A, IEF_VBLANK
   ld [rIE], A
+  ei; Enable interrupts again
 
   ; Distort and slide Nintendo logo away
   call scene_nintendo_logo_slide
@@ -20,8 +21,6 @@ main:
   ld BC, BANK(skrolli_anthem_data)
   ld A, $05
   call gbt_play ; Play song
-  ei; Enable interrupts again
-
   call scene_skrolli_logo
 
 .loop:
