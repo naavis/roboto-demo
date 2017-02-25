@@ -1,10 +1,6 @@
 INCLUDE "Hardware.inc"
 INCLUDE "gbt_player/gbt_player.inc"
 
-IMPORT scene_nintendo_logo_slide
-IMPORT scene_skrolli_logo
-IMPORT skrolli_anthem_data
-
 GLOBAL VBlank_Address
 GLOBAL LCDC_Address
 
