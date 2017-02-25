@@ -26,7 +26,7 @@ VBlank:
   ; Update music at V-blank
   call gbt_update
   ld HL, VBlank_Address
-  jr IRQ_common
+  jr interrupt_common
 
 LCDC:
   push AF
@@ -34,9 +34,9 @@ LCDC:
   push DE
   push HL
   ld HL, LCDC_Address
-  ; jr IRQ_common
+  ; jr interrupt_common
 
-IRQ_common:
+interrupt_common:
   ld	A, [HL+]
   ld	H, [HL]
   ld	L, A
