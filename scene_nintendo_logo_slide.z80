@@ -38,6 +38,66 @@ scene_nintendo_logo_slide::
   ld A, [scene_done]
   cp 1
   jr nz, .loop
+
+  ; Technically scene is not done yet, screen needs to be faded to black
+  ; fade_delay and scene_done are reused
+  di
+  RGBG_WaitForVRAM
+  xor A
+  ld [rBGP], A
+  ld [fade_delay], A
+  ld [scene_done], A
+  call initialize_interrupts
+  ld BC, final_fade_out_interrupt
+  call set_vblank_interrupt
+  ei
+.final_fade_out_loop:
+  halt
+  ld A, [scene_done]
+  cp 1
+  jr nz, .final_fade_out_loop
+  ret
+
+; This interrupt fades the whole screen to black at the end of this scene
+final_fade_out_interrupt:
+  ld A, [fade_delay]
+  cp $5
+  jr z, .delay_done
+  inc A
+  ld [fade_delay], A
+  jr .interrupt_done
+.delay_done
+  ld A, [rBGP]
+  cp $FF
+  jr nz, .fade_palette
+  ld A, 1
+  ld [scene_done], A
+  jr .interrupt_done
+.fade_palette:
+  ld A, [rBGP]
+  add %01010101
+  ld [rBGP], A
+  xor A
+  ld [fade_delay], A
+.interrupt_done:
+  ret
+
+final_fade_out:
+  xor A
+  ld [rBGP], A
+.final_fade_outer_loop:
+  ld A, [rBGP]
+  cp $FF
+  jr z, .all_done
+  add %01010101
+  ld [rBGP], A
+  ld A, $FF
+.final_fade_inner_loop:
+  cp $00
+  jr z, .final_fade_outer_loop
+  dec A
+  jr .final_fade_inner_loop
+.all_done:
   ret
 
 vblank_interrupt:
