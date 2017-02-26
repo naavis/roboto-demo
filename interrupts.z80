@@ -89,4 +89,6 @@ interrupt_setter_common:
 Section "Interrupt handler addresses",BSS
 VBlank_Address: DS 2
 LCDC_Address: DS 2
+; music_playing == 0, music not playing
+; music_playing == 1, music is playing
 music_playing:: DS 1

@@ -23,6 +23,8 @@ main:
   ld [music_playing], A
   call scene_skrolli_logo
 
+  call scene_plasma
+
 .loop:
   halt
   jr .loop

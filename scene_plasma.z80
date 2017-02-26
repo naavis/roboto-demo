@@ -1,0 +1,85 @@
+INCLUDE "Hardware.inc"
+INCLUDE "rgbgrafx/rgbgrafx.inc"
+
+Section "Plasma scene",CODE
+scene_plasma::
+  ; Set all palette colors to black for the duration of scene setup
+  RGBG_WaitForVRAM
+  ld A, $FF
+  ld [rBGP], A
+
+  ; Reset background scroll registers
+  xor A
+  ld [rSCX], A
+  ld [rSCY], A
+
+; Set LCDC register initial values
+LCDC_INITIAL_STATUS EQU LCDCF_ON | LCDCF_WINOFF | LCDCF_BG8000 | LCDCF_BG9800 | LCDCF_BGON
+  ld A, LCDC_INITIAL_STATUS
+  ld [rLCDC], A
+
+  di
+  ; Clear interrupt handlers
+  call initialize_interrupts
+  ei
+
+  call load_plasma_tiles
+
+  ; Reset color palette to default
+  RGBG_WaitForVRAM
+  call RGBG_SetDefPals
+
+.loop:
+  halt
+  jr .loop
+  ret
+
+load_plasma_tiles:
+  RGBG_WaitVBL
+  ld A, $80
+  ld [RGBG_tileset], A
+  ld BC, plasma_tileset ; Tileset address
+  ld D, $4 ; Number of tiles
+  ld E, 0 ; Destination offset
+  call RGBG_LoadTiles
+
+  ld A, $98
+  ld [RGBG_tilemap], A
+
+  ld B, 2 ; Tile to fill with
+  ld H, 0 ; Y
+  ld L, 0 ; X
+  ld D, 32 ; Height
+  ld E, 32 ; Width
+  call RGBG_FillTileMap
+
+  ret
+
+; This LUT contains one 256-byte sine period varying between 0 and 128
+sine_lut:
+ANGLE SET 0.0
+      REPT 256
+      DB (MUL(64.0, SIN(ANGLE))+64.0)>>16
+ANGLE SET ANGLE+256.0
+      ENDR
+
+plasma_tileset:
+; Black tiles
+REPT 16
+  DB $FF
+ENDR
+
+; Dark gray tiles
+REPT 8
+  DB $00, $FF
+ENDR
+
+; Light gray tiles
+REPT 8
+  DB $FF, $00
+ENDR
+
+; White tiles
+REPT 16
+  DB $00
+ENDR

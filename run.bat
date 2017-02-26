@@ -23,6 +23,9 @@ rgbasm.exe -o build/header.o header.z80
 rgbasm.exe -o build/skrollidemo.o skrollidemo.z80
 @if errorlevel 1 goto error
 
+rgbasm.exe -o build/scene_plasma.o scene_plasma.z80
+@if errorlevel 1 goto error
+
 rgbasm.exe -o build/interrupts.o interrupts.z80
 @if errorlevel 1 goto error
 

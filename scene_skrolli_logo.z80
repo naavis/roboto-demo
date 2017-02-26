@@ -73,7 +73,7 @@ scene_skrolli_logo::
 .loop
   xor A
 .innerloop
-  ; Busywait to slow sliding window down
+  ; Busywait to slow sliding window
   inc A
   cp $FF
   jr nz, .innerloop
