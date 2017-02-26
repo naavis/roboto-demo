@@ -14,8 +14,7 @@ scene_plasma::
   ld [rSCY], A
 
 ; Set LCDC register initial values
-LCDC_INITIAL_STATUS EQU LCDCF_ON | LCDCF_WINOFF | LCDCF_BG8000 | LCDCF_BG9800 | LCDCF_BGON
-  ld A, LCDC_INITIAL_STATUS
+  ld A, (LCDCF_ON | LCDCF_WINOFF | LCDCF_BG8000 | LCDCF_BG9800 | LCDCF_BGON)
   ld [rLCDC], A
 
   di
@@ -29,9 +28,18 @@ LCDC_INITIAL_STATUS EQU LCDCF_ON | LCDCF_WINOFF | LCDCF_BG8000 | LCDCF_BG9800 | 
   RGBG_WaitForVRAM
   call RGBG_SetDefPals
 
+  di
+  ld BC, plasma_vblank
+  call set_vblank_interrupt
+  ei
+
 .loop:
   halt
   jr .loop
+  ret
+
+plasma_vblank:
+  ; TODO: Animate plasma with palette rotation
   ret
 
 load_plasma_tiles:
@@ -46,7 +54,8 @@ load_plasma_tiles:
   ld A, $98
   ld [RGBG_tilemap], A
 
-  ld B, 2 ; Tile to fill with
+  ; TODO: Replace this with a plasma texture
+  ld B, 0 ; Tile to fill with
   ld H, 0 ; Y
   ld L, 0 ; X
   ld D, 32 ; Height
