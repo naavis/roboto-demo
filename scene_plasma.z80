@@ -28,6 +28,9 @@ scene_plasma::
   RGBG_WaitForVRAM
   call RGBG_SetDefPals
 
+  xor A
+  ld [delay_counter], A
+
   di
   ld BC, plasma_vblank
   call set_vblank_interrupt
@@ -39,56 +42,120 @@ scene_plasma::
   ret
 
 plasma_vblank:
-  ; TODO: Animate plasma with palette rotation
+  ; Animate plasma with palette rotation
+  ; TODO: Also animate SCX and SCY
+  ld A, [delay_counter]
+  cp 8
+  jr nz, .done
+  xor A
+  ld [delay_counter], A
+  ld A, [rBGP]
+  rlca
+  rlca
+  ld [rBGP], A
+.done:
+  ld A, [delay_counter]
+  inc A
+  ld [delay_counter], A
   ret
 
 load_plasma_tiles:
   RGBG_WaitVBL
+  ; Set tileset address for RGBG
   ld A, $80
   ld [RGBG_tileset], A
+
+  ; Load tileset into VRAM
   ld BC, plasma_tileset ; Tileset address
-  ld D, $4 ; Number of tiles
+  ld D, 8 ; Number of tiles
   ld E, 0 ; Destination offset
   call RGBG_LoadTiles
 
+  ; Set tilemap address for RGBG
   ld A, $98
   ld [RGBG_tilemap], A
 
-  ; TODO: Replace this with a plasma texture
-  ld B, 0 ; Tile to fill with
-  ld H, 0 ; Y
-  ld L, 0 ; X
-  ld D, 32 ; Height
-  ld E, 32 ; Width
-  call RGBG_FillTileMap
+  ld E, 0 ; Row
+.row_loop:
+  ld D, 0 ; Column
+.column_loop:
+  ld A, D
+  ; Multiply A to get more sine periods
+  sla A
+  call get_sine_value
+  ld B, A ; B now contains sin(2*column)
+  ld A, E
+  sla A
+  call get_sine_value
+  add B ; A now contains sin(2*column) + sin(2*row)
+  ; Squeeze from range 0-255 to 0-8
+  sra A
+  sra A
+  sra A
+  sra A
+  sra A
+  ld H, E
+  ld L, D
+  call RGBG_SetTile
+  inc D
+  ld A, D
+  cp 32
+  jr nz, .column_loop
+  inc E
+  ld A, E
+  cp 32
+  jr nz, .row_loop
 
   ret
 
-; This LUT contains one 256-byte sine period varying between 0 and 128
+; Gets value from sine table
+; A = index to table
+; Return value placed in A
+get_sine_value:
+  push HL
+  push BC
+  ; If A is over 31, decrement 32 until in range 0-31
+.comparison_loop:
+  cp 32
+  jr c, .in_range
+  sub 32
+  jr .comparison_loop
+.in_range:
+  ld C, A
+  ld B, 0
+  ld HL, sine_lut
+  add HL, BC
+  ld A, [HL]
+  pop BC
+  pop HL
+  ret
+
+
+; This LUT contains one 32-byte sine period varying between 0 and 127
 sine_lut:
 ANGLE SET 0.0
-      REPT 256
-      DB (MUL(64.0, SIN(ANGLE))+64.0)>>16
-ANGLE SET ANGLE+256.0
+      REPT 32
+      DB (MUL(63.0, SIN(ANGLE))+63.0)>>16
+ANGLE SET ANGLE+2048.0
       ENDR
 
 plasma_tileset:
-; Black tiles
-REPT 16
-  DB $FF
-ENDR
+DB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+DB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+DB $AA,$FF,$55,$FF,$AA,$FF,$55,$FF
+DB $AA,$FF,$55,$FF,$AA,$FF,$55,$FF
+DB $00,$FF,$00,$FF,$00,$FF,$00,$FF
+DB $00,$FF,$00,$FF,$00,$FF,$00,$FF
+DB $55,$AA,$AA,$55,$55,$AA,$AA,$55
+DB $55,$AA,$AA,$55,$55,$AA,$AA,$55
+DB $FF,$00,$FF,$00,$FF,$00,$FF,$00
+DB $FF,$00,$FF,$00,$FF,$00,$FF,$00
+DB $AA,$00,$55,$00,$AA,$00,$55,$00
+DB $AA,$00,$55,$00,$AA,$00,$55,$00
+DB $88,$00,$00,$00,$22,$00,$00,$00
+DB $88,$00,$00,$00,$22,$00,$00,$00
+DB $00,$00,$00,$00,$00,$00,$00,$00
+DB $00,$00,$00,$00,$00,$00,$00,$00
 
-; Dark gray tiles
-REPT 8
-  DB $00, $FF
-ENDR
-
-; Light gray tiles
-REPT 8
-  DB $FF, $00
-ENDR
-
-; White tiles
-REPT 16
-  DB $00
-ENDR
+Section "Plasma variables",BSS
+delay_counter: DS 1
