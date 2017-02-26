@@ -87,7 +87,15 @@ load_plasma_tiles:
   ld A, E
   sla A
   call get_sine_value
-  add B ; A now contains sin(2*column) + sin(2*row)
+  sra A
+  add B
+  ld B, A ; B now contains 0.5 * (sin(2*column) + sin(2*row))
+  ld A, E
+  add D
+  sla A
+  call get_sine_value
+  add B ; A now contains sin(2 * column + 2 * row) + 0.5 * (sin(2*column) + sin(2*row))
+
   ; Squeeze from range 0-255 to 0-8
   sra A
   sra A
