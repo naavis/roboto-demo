@@ -42,8 +42,14 @@ scene_plasma::
   ret
 
 plasma_vblank:
-  ; Animate plasma with palette rotation
-  ; TODO: Also animate SCX and SCY
+  ; Animate SCX and SCY
+  ld A, [rSCX]
+  inc A
+  ld [rSCX], A
+  inc A
+  ld [rSCY], A
+
+  ; Rotate palette
   ld A, [delay_counter]
   cp 8
   jr nz, .done
