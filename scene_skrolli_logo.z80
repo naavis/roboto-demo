@@ -1,5 +1,7 @@
 INCLUDE "Hardware.inc"
 INCLUDE "rgbgrafx/rgbgrafx.inc"
+
+Section "Skrolli Logo Data",DATA
 INCLUDE "imagedata/skrolli_logo.inc"
 
 Section "Skrolli Logo",CODE

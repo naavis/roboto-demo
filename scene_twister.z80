@@ -1,0 +1,113 @@
+INCLUDE "Hardware.inc"
+INCLUDE "rgbgrafx/rgbgrafx.inc"
+
+Section "Twister Data",DATA
+INCLUDE "imagedata/twister.inc"
+
+Section "Twister scene",CODE
+scene_twister::
+  di
+  call initialize_interrupts
+  ei
+  ; Set all palette colors to black for the duration of loading image data
+  RGBG_WaitForVRAM
+  ld A, $FF
+  ld [rBGP], A
+
+  ; Initialize high byte of the tileset starting address
+  ld A, $80
+  ld [RGBG_tileset], A
+  ; Load tile patterns to VRAM
+  ld BC, twister_2bit_tile_data
+  ld D, $FF
+  ld E, 0
+  RGBG_WaitForVRAM
+  call RGBG_LoadTiles
+
+  ; Initialize high byte of the tilemap starting address
+  ld A, $98
+  ld [RGBG_tilemap], A
+
+  ; Set tilemap offset to zero
+  xor A
+  ld [RGBG_map_offset], A
+
+  ; Load tile map
+  RGBG_WaitForVRAM
+  ld BC, twister_2bit_map_data
+  ld H, $0
+  ld L, $0
+  ld E, twister_2bit_tile_map_width
+  ld D, twister_2bit_tile_map_height
+  call RGBG_SetTileMap
+
+  ; Reset background scroll registers
+  xor A
+  ld [rSCX], A
+  ld [rSCY], A
+  ld [delay], A
+
+  ; Set proper values for LCDC register
+  ld A, (LCDCF_ON | LCDCF_WINOFF | LCDCF_BG8000 | LCDCF_BG9800 | LCDCF_BGON)
+  ld [rLCDC], A
+
+  ; Set LCDC interrupt to trigger when LYC == LY
+  ld A, (STATF_LYC)
+  ld [rSTAT], A
+
+  ; Enable VBlank and LCDC interrupts
+  di
+  ld A, [rIE]
+  and %11110000
+  ld B, (IEF_LCDC | IEF_VBLANK)
+  or B
+  ld [rIE], A
+
+  ld BC, twister_vblank
+  call set_vblank_interrupt
+
+  ld BC, twister_lcdc
+  call set_lcdc_interrupt
+  ei
+
+  ; Initialize LYC to $00
+  ld A, $00
+  ld [rLYC], A
+
+  ; Reset color palette to default
+  RGBG_WaitForVRAM
+  call RGBG_SetDefPals
+
+.loop:
+  halt
+  jr .loop
+  ret
+
+twister_vblank:
+  ; Trigger first interrupt at first scanline
+  ld A, 0
+  ld [rLYC], A
+  ; Set SCY to 0 by default
+  xor A
+  ld [rSCY], A
+  ret
+
+twister_lcdc:
+  ; Increment LYC to trigger interrupt again at next scanline
+  ld A, [rLYC]
+  inc A
+  ld [rLYC], A
+  ret
+
+; This LUT contains one 144-byte sine period varying between 0 and 127
+sine_lut:
+ANGLE SET 0.0
+      REPT 144
+      DB (MUL(63.0, SIN(ANGLE))+63.0)>>16
+ANGLE SET ANGLE+455.1111
+      ENDR
+
+Section "Twister variables",BSS
+
+twister_offset: DS 1
+delay: DS 1

@@ -13,7 +13,7 @@ scene_plasma::
   ld [rSCX], A
   ld [rSCY], A
 
-; Set LCDC register initial values
+  ; Set LCDC register initial values
   ld A, (LCDCF_ON | LCDCF_WINOFF | LCDCF_BG8000 | LCDCF_BG9800 | LCDCF_BGON)
   ld [rLCDC], A
 

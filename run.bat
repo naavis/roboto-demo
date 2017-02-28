@@ -29,6 +29,9 @@ rgbasm.exe -o build/scene_plasma.o scene_plasma.z80
 rgbasm.exe -o build/scene_lissajous.o scene_lissajous.z80
 @if errorlevel 1 goto error
 
+rgbasm.exe -o build/scene_twister.o scene_twister.z80
+@if errorlevel 1 goto error
+
 rgbasm.exe -o build/interrupts.o interrupts.z80
 @if errorlevel 1 goto error
 

@@ -24,8 +24,9 @@ main:
   call scene_skrolli_logo
 
   call scene_lissajous
-
+  call scene_twister
   call scene_plasma
+
 
 .loop:
   halt
