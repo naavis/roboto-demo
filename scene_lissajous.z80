@@ -80,21 +80,22 @@ lissajous_vblank:
   ld A, [frame_number] ; Get frame number to index LUTs
 
   ld D, A ; Save frame number to D
-  ld E, 20 ; Use E as sprite counter
+  ld E, 10 ; Use E as sprite counter
 
 .loop_start:
-  ld A, D ; Load frame number to A
   swap E
+  ld A, D ; Load frame number to A
   add E
-  call get_cos
-  add 8
-  ld B, A ; Set cosine value to X
+  add A
+  call get_sine
+  add 20
+  ld B, A ; Set first sine value to X
 
   ld A, D ; Load frame number to A
   add E
   call get_sine ; Get sine value and save it to A
-  add 16
-  ld C, A ; Set sine value to Y coordinate
+  add 20
+  ld C, A ; Set second sine value to Y coordinate
 
   swap E
   ld A, E
@@ -115,13 +116,6 @@ get_sine:
   ld A, [HL]
   ret
 
-; A = index from $00 to $FF
-get_cos:
-  ld H, $30
-  ld L, A
-  ld A, [HL]
-  ret
-
 point_sprite:
 DW `00000000
 DW `00000000
@@ -137,14 +131,6 @@ sine_lut:
 ANGLE   SET     0.0
         REPT    256
         DB      (MUL(64.0,SIN(ANGLE))+64.0)>>16
-ANGLE   SET     ANGLE+256.0
-        ENDR
-
-Section "Cosine lookup-table",HOME[$3000]
-cosine_lut:
-ANGLE   SET     0.0
-        REPT    256
-        DB      (MUL(64.0,COS(ANGLE))+64.0)>>16
 ANGLE   SET     ANGLE+256.0
         ENDR
 
