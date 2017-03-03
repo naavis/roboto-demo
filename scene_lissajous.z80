@@ -77,17 +77,31 @@ scene_lissajous::
   jr .loop
 
 lissajous_vblank:
-  ld A, [frame_number] ; Get frame number to index sine table
+  ld A, [frame_number] ; Get frame number to index LUTs
+
   ld D, A ; Save frame number to D
-  call get_sine ; Get sine value and save it to A
-  add 16
-  ld C, A ; Set sine value to Y coordinate
-  ld A, D
+  ld E, 20 ; Use E as sprite counter
+
+.loop_start:
+  ld A, D ; Load frame number to A
+  swap E
+  add E
   call get_cos
   add 8
   ld B, A ; Set cosine value to X
-  xor A
+
+  ld A, D ; Load frame number to A
+  add E
+  call get_sine ; Get sine value and save it to A
+  add 16
+  ld C, A ; Set sine value to Y coordinate
+
+  swap E
+  ld A, E
   call RGBG_SetSpritePos ; Save sprite position
+  dec E
+  jr nz, .loop_start
+
   ld A, D ; Return frame number to A
   inc A ; Increment frame number
   ld [frame_number], A ; Save frame number
