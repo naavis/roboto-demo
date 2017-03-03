@@ -1,0 +1,101 @@
+INCLUDE "Hardware.inc"
+INCLUDE "rgbgrafx/rgbgrafx.inc"
+
+Section "Lissajous curve scene",CODE
+scene_lissajous::
+  di
+  ; Set all palette colors to black for the duration of loading image data
+  RGBG_WaitForVRAM
+  ld A, $FF
+  ld [rBGP], A
+  ld [rOBP0], A
+
+  ; Reset interrupt handlers
+  call initialize_interrupts
+
+  ; Enable V-blank interrupts
+  ld A, IEF_VBLANK
+  ld [rIE], A
+
+  ; Configure LCD controller
+  ld A, (LCDCF_ON | LCDCF_WINOFF | LCDCF_BG8000 | LCDCF_BGOFF | LCDCF_OBJ8 | LCDCF_OBJON)
+  ld [rLCDC], A
+
+  ; Initialize high byte of the tileset starting address
+  ld A, $80
+  ld [RGBG_tileset], A
+
+  ; Load point sprite tile into VRAM
+  ld BC, point_sprite
+  ld D, 1
+  ld E, 0
+  call RGBG_LoadTiles
+  call RGBG_ZeroOAM
+  call RGBG_CopyDMARoutine
+
+; Set all 40 sprites to show same pattern
+  xor A
+  ld B, A
+.sprite_creation_loop:
+  push AF
+  call RGBG_SetSpriteTile
+  pop AF
+  inc A
+  cp 40
+  jr c, .sprite_creation_loop
+
+; Set all sprites to 0,0
+  xor A
+  ld B, A
+  ld C, A
+.sprite_initial_position_loop:
+  push AF
+  call RGBG_SetSpritePos
+  pop AF
+  inc A
+  cp 40
+  jr c, .sprite_initial_position_loop
+
+  RGBG_WaitVBL
+  call RGBG_DoDMA ; Send sprite data to OAM
+
+  ; Set interrupt handler
+  ld BC, lissajous_vblank
+  call set_vblank_interrupt
+
+  ; Reset color palette to default
+  RGBG_WaitForVRAM
+  call RGBG_SetDefPals
+
+  ei ; Enable interrupts again
+
+.loop:
+  halt
+  jr .loop
+
+lissajous_vblank:
+  ; Show one sprite at 50, 50 to check that everything works
+  ld A, 0
+  ld B, 50
+  ld C, 50
+  call RGBG_SetSpritePos
+  call RGBG_DoDMA
+  ret
+
+
+point_sprite:
+DW `00000000
+DW `00000000
+DW `00033000
+DW `00333300
+DW `00333300
+DW `00033000
+DW `00000000
+DW `00000000
+
+sine_lut:
+ANGLE   SET     0.0
+        REPT    256
+        DB      (MUL(64.0,SIN(ANGLE))+64.0)>>16
+ANGLE   SET     ANGLE+256.0
+        ENDR

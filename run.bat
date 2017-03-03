@@ -26,6 +26,9 @@ rgbasm.exe -o build/skrollidemo.o skrollidemo.z80
 rgbasm.exe -o build/scene_plasma.o scene_plasma.z80
 @if errorlevel 1 goto error
 
+rgbasm.exe -o build/scene_lissajous.o scene_lissajous.z80
+@if errorlevel 1 goto error
+
 rgbasm.exe -o build/interrupts.o interrupts.z80
 @if errorlevel 1 goto error
 
@@ -45,6 +48,9 @@ rgbasm.exe -i rgbgrafx/ -o build/rgbgrafx.o rgbgrafx/rgbgrafx.z80
 @if errorlevel 1 goto error
 
 rgbasm.exe -i rgbgrafx/ -o build/tiles.o rgbgrafx/tiles.z80
+@if errorlevel 1 goto error
+
+rgbasm.exe -i rgbgrafx/ -o build/sprites.o rgbgrafx/SPRITES.Z80
 @if errorlevel 1 goto error
 
 rgbasm.exe -i gbt_player/ -o build/gbt_player.o gbt_player/gbt_player.asm

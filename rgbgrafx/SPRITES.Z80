@@ -2,7 +2,7 @@ INCLUDE "INCDEC.INC"
 INCLUDE "RGBGRAFX.INC"
 INCLUDE "HARDWARE.INC"
 
-SECTION "RGBG_OAM",BSS[$DF00] ;must be aligned to $100 bytes.
+SECTION "RGBG_OAM",WRAMX[$DF00] ;must be aligned to $100 bytes.
 
 RGBG_OAM::	DS 40*4
 
@@ -22,7 +22,7 @@ RGBG_SetSpriteTile::
 	sla A
 	add A,2
 	ld L,A
-	
+
 	ld [HL],B
 
 	ld A,1
@@ -44,11 +44,11 @@ RGBG_SetSpriteProp::
 	sla A
 	add A,3
 	ld L,A
-	
+
 	ld [HL],B
-	
+
 	ret
-		
+
 SECTION "RGBG_SetSpritePos",HOME
 
 RGBG_SetSpritePos::
@@ -63,10 +63,10 @@ RGBG_SetSpritePos::
 	sla A
 	sla A
 	ld L,A
-	
+
 ;set the y coordinate
 	ld [HL],C
-	
+
 	inc HL
 
 ;set the x coordinate
@@ -92,13 +92,13 @@ RGBG_GetSpriteTile::
 	sla A
 	add A,2
 	ld L,A
-	
+
 	ld [HL],B
 
 	ld A,1
 	ld [RGBG_update_sprites],A
 
-	ret	
+	ret
 
 SECTION "RGBG_GetSpriteProp",HOME
 
@@ -115,9 +115,9 @@ RGBG_GetSpriteProp::
 	sla A
 	add A,3
 	ld L,A
-	
+
 	ld A,[HL]
-	
+
 	ret
 
 SECTION "RGBG_GetSpritePos",HOME
@@ -135,17 +135,17 @@ RGBG_GetSpritePos::
 	sla A
 	sla A
 	ld L,A
-	
+
 ;get the y coordinate
 	ld C,[HL]
-	
+
 	inc HL
 
 ;get the x coordinate
 	ld B,[HL]
-	
+
 	ret
-	
+
 SECTION "RGBG_MoveSprite",HOME
 
 RGBG_MoveSprite::
@@ -160,12 +160,12 @@ RGBG_MoveSprite::
 	sla A
 	sla A
 	ld L,A
-	
+
 ;set the y coordinate
 	ld A,[HL]
 	add C
 	ld [HL],A
-	
+
 	inc HL
 
 ;set the x coordinate
@@ -193,7 +193,8 @@ RGBG_CopyDMARoutine::
 	ld [HL+],A
 	dec D
 	jr nz,.copyloop
-	
+	ret
+
 
 ;This is the DMA routine that needs to be copied to hiram
 RGBG_DoDMAData::
@@ -205,15 +206,15 @@ RGBG_DoDMAData::
         jr      nz,.loop
 	xor A,A
 	ld [RGBG_update_sprites],A
-        ret
+  ret
 RGBG_DoDMAData_End::
 
 SECTION "RGBG_DMARoutine", HRAM
- 
+
 ;This space is reserved foo the DMA routine.  We can  call it (no input)
 ;after the routine is copied here
 
-RGBG_DoDMA::		DS RGBG_DoDMAData_End-RGBG_DoDMAData					      
+RGBG_DoDMA::		DS RGBG_DoDMAData_End-RGBG_DoDMAData
 
 SECTION "RGBG_ZEROOAM",HOME
 RGBG_ZeroOAM::
@@ -223,7 +224,8 @@ RGBG_ZeroOAM::
 	ld HL,RGBG_OAM
 
 .zerooam
-	ld [HL+],A	
-	
+	ld [HL+],A
+
 	dec B
 	jp nz, .zerooam
+	ret
