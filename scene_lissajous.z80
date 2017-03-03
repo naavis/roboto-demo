@@ -82,7 +82,7 @@ lissajous_vblank:
   ld H, A
   ld A, [frame_number] ; Get frame number to index LUTs
   ld D, A ; Save frame number to D
-  ld E, 12 ; Use E as sprite counter
+  ld E, 40 ; Use E as sprite counter
 
 .loop_start:
   swap E
