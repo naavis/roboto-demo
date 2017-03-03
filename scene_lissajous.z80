@@ -6,6 +6,7 @@ scene_lissajous::
   di ; Disable interrupts during setup
   xor A
   ld [frame_number], A
+  ld [rotation], A
 
   ; Set all palette colors to black for the duration of loading image data
   RGBG_WaitForVRAM
@@ -77,16 +78,18 @@ scene_lissajous::
   jr .loop
 
 lissajous_vblank:
+  ld A, [rotation]
+  ld H, A
   ld A, [frame_number] ; Get frame number to index LUTs
-
   ld D, A ; Save frame number to D
-  ld E, 10 ; Use E as sprite counter
+  ld E, 12 ; Use E as sprite counter
 
 .loop_start:
   swap E
   ld A, D ; Load frame number to A
   add E
   add A
+  add H
   call get_sine
   add 20
   ld B, A ; Set first sine value to X
@@ -99,21 +102,30 @@ lissajous_vblank:
 
   swap E
   ld A, E
+  push HL
   call RGBG_SetSpritePos ; Save sprite position
+  pop HL
   dec E
   jr nz, .loop_start
+  push HL
+  call RGBG_DoDMA ; Execute DMA
+  pop HL
 
   ld A, D ; Return frame number to A
   inc A ; Increment frame number
   ld [frame_number], A ; Save frame number
-  call RGBG_DoDMA ; Execute DMA
+  ld A, H
+  inc A
+  ld [rotation], A
   ret
 
 ; A = index from $00 to $FF
 get_sine:
+  push HL
   ld H, $2F
   ld L, A
   ld A, [HL]
+  pop HL
   ret
 
 point_sprite:
@@ -136,3 +148,4 @@ ANGLE   SET     ANGLE+256.0
 
 Section "Lissajous variables",BSS
 frame_number: DS 1
+rotation: DS 1
