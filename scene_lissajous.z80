@@ -3,7 +3,10 @@ INCLUDE "rgbgrafx/rgbgrafx.inc"
 
 Section "Lissajous curve scene",CODE
 scene_lissajous::
-  di
+  di ; Disable interrupts during setup
+  xor A
+  ld [frame_number], A
+
   ; Set all palette colors to black for the duration of loading image data
   RGBG_WaitForVRAM
   ld A, $FF
@@ -74,14 +77,36 @@ scene_lissajous::
   jr .loop
 
 lissajous_vblank:
-  ; Show one sprite at 50, 50 to check that everything works
-  ld A, 0
-  ld B, 50
-  ld C, 50
-  call RGBG_SetSpritePos
-  call RGBG_DoDMA
+  ld A, [frame_number] ; Get frame number to index sine table
+  ld D, A ; Save frame number to D
+  call get_sine ; Get sine value and save it to A
+  add 16
+  ld C, A ; Set sine value to Y coordinate
+  ld A, D
+  call get_cos
+  add 8
+  ld B, A ; Set cosine value to X
+  xor A
+  call RGBG_SetSpritePos ; Save sprite position
+  ld A, D ; Return frame number to A
+  inc A ; Increment frame number
+  ld [frame_number], A ; Save frame number
+  call RGBG_DoDMA ; Execute DMA
   ret
 
+; A = index from $00 to $FF
+get_sine:
+  ld H, $2F
+  ld L, A
+  ld A, [HL]
+  ret
+
+; A = index from $00 to $FF
+get_cos:
+  ld H, $30
+  ld L, A
+  ld A, [HL]
+  ret
 
 point_sprite:
 DW `00000000
@@ -93,9 +118,21 @@ DW `00033000
 DW `00000000
 DW `00000000
 
+Section "Sine lookup-table",HOME[$2F00] ; Alignment to 00 important
 sine_lut:
 ANGLE   SET     0.0
         REPT    256
         DB      (MUL(64.0,SIN(ANGLE))+64.0)>>16
 ANGLE   SET     ANGLE+256.0
         ENDR
+
+Section "Cosine lookup-table",HOME[$3000]
+cosine_lut:
+ANGLE   SET     0.0
+        REPT    256
+        DB      (MUL(64.0,COS(ANGLE))+64.0)>>16
+ANGLE   SET     ANGLE+256.0
+        ENDR
+
+Section "Lissajous variables",BSS
+frame_number: DS 1
