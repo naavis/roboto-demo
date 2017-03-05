@@ -93,21 +93,39 @@ twister_vblank:
   ret
 
 twister_lcdc:
+  ld A, [rLY]
+  ld B, A
+  call get_sine
+  cp 64
+  jr c, .in_range
+  sub 64
+.in_range:
+  sub B
+  bit 4, A
+  jr z, .no_flip
+  add 64
+.no_flip:
+  ld [rSCY], A
   ; Increment LYC to trigger interrupt again at next scanline
   ld A, [rLYC]
   inc A
   ld [rLYC], A
   ret
 
-; This LUT contains one 144-byte sine period varying between 0 and 127
+get_sine:
+  ld H, $30
+  ld L, A
+  ld A, [HL]
+  ret
+
+Section "Sine LUT",HOME[$3000] ; Alignment to 00 important
+; This LUT contains one 256-byte sine period varying between 0 and 32
 sine_lut:
-ANGLE SET 0.0
-      REPT 144
-      DB (MUL(63.0, SIN(ANGLE))+63.0)>>16
-ANGLE SET ANGLE+455.1111
+ANGLE=0.0
+      REPT 256
+      DB (MUL(16.0, SIN(ANGLE))+16.0)>>16
+ANGLE=ANGLE+256.0
       ENDR
 
 Section "Twister variables",BSS
-
-twister_offset: DS 1
 delay: DS 1
