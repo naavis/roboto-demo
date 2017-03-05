@@ -18,7 +18,7 @@ scene_twister::
   ld A, $80
   ld [RGBG_tileset], A
   ; Load tile patterns to VRAM
-  ld BC, twister_2bit_tile_data
+  ld BC, twister_image_tile_data
   ld D, $FF
   ld E, 0
   RGBG_WaitForVRAM
@@ -34,11 +34,11 @@ scene_twister::
 
   ; Load tile map
   RGBG_WaitForVRAM
-  ld BC, twister_2bit_map_data
+  ld BC, twister_image_map_data
   ld H, $0
   ld L, $0
-  ld E, twister_2bit_tile_map_width
-  ld D, twister_2bit_tile_map_height
+  ld E, twister_image_tile_map_width
+  ld D, twister_image_tile_map_height
   call RGBG_SetTileMap
 
   ; Reset background scroll registers
