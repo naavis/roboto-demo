@@ -26,7 +26,11 @@ scene_plasma::
 
   ; Reset color palette to default
   RGBG_WaitForVRAM
-  call RGBG_SetDefPals
+  RGBG_WaitForVRAM
+  ld A, %11100100
+	ld [rBGP],A
+	ld [rOBP0],A
+	ld [rOBP1],A
 
   xor A
   ld [delay_counter], A

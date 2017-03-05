@@ -69,7 +69,10 @@ scene_lissajous::
 
   ; Reset color palette to default
   RGBG_WaitForVRAM
-  call RGBG_SetDefPals
+  ld A, %11100100
+	ld [rBGP],A
+	ld [rOBP0],A
+	ld [rOBP1],A
 
   ei ; Enable interrupts again
 

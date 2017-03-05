@@ -22,7 +22,6 @@ main:
   ld A, $1
   ld [music_playing], A
   call scene_skrolli_logo
-
   call scene_twister
   call scene_lissajous
   call scene_plasma

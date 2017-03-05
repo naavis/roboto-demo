@@ -66,7 +66,10 @@ scene_skrolli_logo::
 
   ; Reset color palette to default
   RGBG_WaitForVRAM
-  call RGBG_SetDefPals
+  ld A, %11100100
+	ld [rBGP],A
+	ld [rOBP0],A
+	ld [rOBP1],A
 
   ; Animate window sliding from left to right
   xor A ; Set A to zero

@@ -44,9 +44,6 @@ rgbasm.exe -o build/scene_nintendo_logo_slide.o scene_nintendo_logo_slide.z80
 rgbasm.exe -i rgbgrafx/ -o build/maps.o rgbgrafx/maps.z80
 @if errorlevel 1 goto error
 
-rgbasm.exe -i rgbgrafx/ -o build/pals.o rgbgrafx/pals.z80
-@if errorlevel 1 goto error
-
 rgbasm.exe -i rgbgrafx/ -o build/rgbgrafx.o rgbgrafx/rgbgrafx.z80
 @if errorlevel 1 goto error
 
