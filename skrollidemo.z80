@@ -5,6 +5,7 @@ Section "Initializer",HOME[$100]
 
 Section "MainCode",HOME[$150]
 main:
+  ; Don't play music during the Nintendo logo effect
   xor A
   ld [music_playing], A
   di ; Disable interrupts while setting them up
@@ -14,13 +15,15 @@ main:
   call scene_nintendo_logo_slide
 
   ; Initialize music
-  ld DE, skrolli_anthem_data
-  ld BC, BANK(skrolli_anthem_data)
-  ld A, $05
+  ld DE, skrolli_anthem_data ; Address to music data
+  ld BC, BANK(skrolli_anthem_data) ; Music ROM bank
+  ld A, $05 ; Set default speed for music
   call gbt_play ; Play song
 
+  ; Enable music
   ld A, $1
   ld [music_playing], A
+  ; Begin showing actual scenes
   call scene_skrolli_logo
   call scene_twister
   call scene_lissajous
