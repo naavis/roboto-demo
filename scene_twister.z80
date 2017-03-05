@@ -45,7 +45,6 @@ scene_twister::
   xor A
   ld [rSCX], A
   ld [rSCY], A
-  ld [delay], A
 
   ; Set proper values for LCDC register
   ld A, (LCDCF_ON | LCDCF_WINOFF | LCDCF_BG8000 | LCDCF_BG9800 | LCDCF_BGON)
@@ -73,6 +72,8 @@ scene_twister::
   ; Initialize LYC to $00
   ld A, $00
   ld [rLYC], A
+  ; Set twister_offset to zero at start
+  ld [twister_offset], A
 
   ; Reset color palette to default
   RGBG_WaitForVRAM
@@ -90,21 +91,35 @@ twister_vblank:
   ; Set SCY to 0 by default
   xor A
   ld [rSCY], A
+  ; Increment twister_offset
+  ld A, [twister_offset]
+  inc A
+  ld [twister_offset], A
   ret
 
 twister_lcdc:
+  ; Load raster line number to A
   ld A, [rLY]
+  ; Store raster line in B
   ld B, A
+  ; Load per-frame offset to A
+  ld A, [twister_offset]
+  ; Add offset to raster line number
+  add B
+  ; Get sine(rasterline + offset) and store in A
   call get_sine
+  ; Keep sine in range 0-63
   cp 64
   jr c, .in_range
   sub 64
 .in_range:
+  ; Jump 64 lines down every 8 lines to create checkerboard
   sub B
-  bit 4, A
+  bit 4, B
   jr z, .no_flip
   add 64
 .no_flip:
+  ; Store result in Y scroll register
   ld [rSCY], A
   ; Increment LYC to trigger interrupt again at next scanline
   ld A, [rLYC]
@@ -121,11 +136,12 @@ get_sine:
 Section "Sine LUT",HOME[$3000] ; Alignment to 00 important
 ; This LUT contains one 256-byte sine period varying between 0 and 32
 sine_lut:
+RANGE=35.0
 ANGLE=0.0
       REPT 256
-      DB (MUL(16.0, SIN(ANGLE))+16.0)>>16
+      DB (MUL(DIV(RANGE, 2.0), SIN(ANGLE))+DIV(RANGE, 2.0))>>16
 ANGLE=ANGLE+256.0
       ENDR
 
 Section "Twister variables",BSS
-delay: DS 1
+twister_offset: DS 1
