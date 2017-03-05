@@ -1,10 +1,9 @@
-@REM Set paths accordingly!
 @REM RGBDS_PATH is the path to rgbasm, rgblink and rgbfix
-@SET RGBDS_PATH=D:\Software\GB Emulator Stuff\rgbds-0.2.4-win32\rgbds-0.2.4\
+@SET RGBDS_PATH=%~dp0\requirements\rgbds-0.2.4\
 @REM MOD2GBT_PATH is the path to mod2gbt.exe
-@SET MOD2GBT_PATH=D:\Software\GB Emulator Stuff\gbt-player-3.0.4\mod2gbt\
+@SET MOD2GBT_PATH=%~dp0\requirements\mod2gbt\
 @REM BGB_PATH is the path to bgb.exe
-@SET BGB_PATH=D:\Software\GB Emulator Stuff\bgb\
+@SET BGB_PATH=%~dp0\requirements\bgb\
 
 @PATH=%RGBDS_PATH%;%MOD2GBT_PATH%;%BGB_PATH%;%PATH%
 
