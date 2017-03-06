@@ -22,18 +22,24 @@ scene_plasma::
   di
   ; Clear interrupt handlers
   call initialize_interrupts
+
+  ; Load tiles into VRAM
+  call load_tiles
+
+  ; Initialize buffer used for plasma calculations
+  call init_plasma_buffer
+
+  ; Set new V-Blank handler
   ld BC, plasma_vblank
   call set_vblank_interrupt
-  ei
-
-  call load_tiles
 
   ; Reset color palette to default
   RGBG_WaitForVRAM
   ld A, %11100100
-	ld [rBGP],A
-	ld [rOBP0],A
-	ld [rOBP1],A
+  ld [rBGP],A
+  ld [rOBP0],A
+  ld [rOBP1],A
+  ei
 
 .loop:
   halt
@@ -41,30 +47,50 @@ scene_plasma::
   ret
 
 plasma_vblank:
+  ld HL, $9800
+  call write_plasma_to_vram
+  ret
+
+init_plasma_buffer:
+  ; Initialize plasma buffer to zero.
+  ld D, $FF
+  ld HL, plasma_buffer
+  xor A
+.loop:
+  ldi [HL], A
+  dec D
+  jr nz, .loop
+
+  ld D, $69
+.loop2:
+  ldi [HL], A
+  dec D
+  jr nz, .loop2
   ret
 
 write_plasma_to_vram:
-  ; Code writes 9 lines (tiles 0-19) to VRAM from plasma_data
-  ld HL, _SCRN0
-  ld DE, plasma_data
-  ld B, 9
+  ; Code writes 18 lines (tiles 0-19) to [HL] from plasma_data
+  ld DE, plasma_buffer
+  ld B, 18 ; Row counter
 .row_loop:
   push BC
-  ld B, 10
+  ld B, 10 ; Run 10 times, since inner loop does two iterations (=20 tiles)
 .tile_loop:
-  RGBG_WaitForVRAM
+  RGBG_WaitForVRAM ; Wait for VRAM to become available
   ld A, [DE]
   ldi [HL], A
   inc DE
+
   ld A, [DE]
   ldi [HL], A
   inc DE
-  dec B
+
+  dec B ; Decrement column counter
   jr nz, .tile_loop
-  ld BC, $000C
-  add HL, BC ; Skip $C non-visible tiles on row
+  ld BC, $000C ; Skip $C non-visible tiles on row
+  add HL, BC
   pop BC
-  dec B
+  dec B ; Decrement row counter
   jr nz, .row_loop
   ret
 
@@ -81,4 +107,4 @@ load_tiles:
 INCLUDE "imagedata/plasma_tiles.inc"
 
 Section "Plasma variables",BSS
-plasma_data: DS 360
+plasma_buffer: DS 360
