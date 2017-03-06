@@ -2,6 +2,7 @@ INCLUDE "Hardware.inc"
 INCLUDE "rgbgrafx/rgbgrafx.inc"
 
 ; NOTE: HRAM $FF90-> is free
+TIMEOFFSET EQU $90
 
 Section "Plasma scene",CODE
 scene_plasma::
@@ -15,6 +16,9 @@ scene_plasma::
   ld [rSCX], A
   ld [rSCY], A
 
+  ; Set time offset to 0
+  ldh [TIMEOFFSET], A
+
   ; Set LCDC register initial values
   ld A, (LCDCF_ON | LCDCF_WINOFF | LCDCF_BG8000 | LCDCF_BG9800 | LCDCF_BGON)
   ld [rLCDC], A
@@ -25,9 +29,6 @@ scene_plasma::
 
   ; Load tiles into VRAM
   call load_tiles
-
-  ; Initialize buffer used for plasma calculations
-  call init_plasma_buffer
 
   ; Reset color palette to default
   RGBG_WaitForVRAM
@@ -42,43 +43,36 @@ scene_plasma::
   call update_plasma_buffer
   ld HL, $9800
   call write_plasma_to_vram
+  ldh A, [TIMEOFFSET]
+  inc A
+  ldh [TIMEOFFSET], A
   jr .loop
-  ret
-
-init_plasma_buffer:
-  ; Initialize plasma buffer to zero.
-  ld D, $FF
-  ld HL, plasma_buffer
-  xor A
-.loop:
-  ldi [HL], A
-  dec D
-  jr nz, .loop
-
-  ld D, $69
-.loop2:
-  ldi [HL], A
-  dec D
-  jr nz, .loop2
   ret
 
 update_plasma_buffer:
   ld HL, plasma_buffer
-  ; Get a starting value and a sine value for every tile row
-  ; Then place starting value + column * sine_value to buffer
   ld D, $00
   ld B, 18 ; Row counter
 .row_loop:
   push BC
   ld B, 20
 .tile_loop:
-  ; Plasma effect
+  ; The magic happens here!
   push HL
+  ; Get sine indexed by B
   ld H, $31
   ld L, B
   ld A, [HL]
+
+  ; Add time offset to sine result
+  ld E, A
+  ldh A, [TIMEOFFSET]
+  add E
+
+  ; Add row-specific offset
   add D
-  and 63
+  and 63 ; Keep in range 0-63
+  ; Store result
   pop HL
   ldi [HL], A
 
@@ -139,9 +133,9 @@ INCLUDE "imagedata/plasma_tiles.inc"
 Section "Plasma sine LUT",HOME[$3100]
 plasma_sine_lut:
 ANGLE=0.0
-      REPT 32
-      DB (MUL(32.0, SIN(ANGLE))+31.0)>>16
-ANGLE=ANGLE+2048.0
+      REPT 64
+      DB (MUL(16.0, SIN(ANGLE))+16.0)>>16
+ANGLE=ANGLE+1024.0
       ENDR
 
 Section "Plasma variables",BSS
