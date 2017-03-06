@@ -41,25 +41,31 @@ scene_plasma::
   ret
 
 plasma_vblank:
-  ; Set BC to $000C,
-  ; the number of tiles skipped at the end of every line.
-  xor A
-  ld B, A
-  ld C, $0C
+  ret
 
-  ; Set HL to $9800, start of tilemap.
-  ld H, $98
-  ld L, A
-
-.outer_loop:
-  REPT 20
-    ldi [HL], A ; Dummy value
-  ENDR
-  add HL, BC
-  inc A
-  cp 18
-  jr c, .outer_loop
-
+write_plasma_to_vram:
+  ; Code writes 9 lines (tiles 0-19) to VRAM from plasma_data
+  ld HL, _SCRN0
+  ld DE, plasma_data
+  ld B, 9
+.row_loop:
+  push BC
+  ld B, 10
+.tile_loop:
+  RGBG_WaitForVRAM
+  ld A, [DE]
+  ldi [HL], A
+  inc DE
+  ld A, [DE]
+  ldi [HL], A
+  inc DE
+  dec B
+  jr nz, .tile_loop
+  ld BC, $000C
+  add HL, BC ; Skip $C non-visible tiles on row
+  pop BC
+  dec B
+  jr nz, .row_loop
   ret
 
 load_tiles:
@@ -73,3 +79,6 @@ load_tiles:
   ret
 
 INCLUDE "imagedata/plasma_tiles.inc"
+
+Section "Plasma variables",BSS
+plasma_data: DS 360
