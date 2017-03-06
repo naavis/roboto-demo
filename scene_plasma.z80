@@ -1,6 +1,8 @@
 INCLUDE "Hardware.inc"
 INCLUDE "rgbgrafx/rgbgrafx.inc"
 
+; $FF90 -> is free
+
 Section "Plasma scene",CODE
 scene_plasma::
   ; Set all palette colors to black for the duration of scene setup
@@ -39,16 +41,34 @@ scene_plasma::
   ret
 
 plasma_vblank:
-  ; Implement plasma effect
+  ; Set BC to $000C,
+  ; the number of tiles skipped at the end of every line.
+  xor A
+  ld B, A
+  ld C, $0C
+
+  ; Set HL to $9800, start of tilemap.
+  ld H, $98
+  ld L, A
+
+.outer_loop:
+  REPT 20
+    ldi [HL], A ; Dummy value
+  ENDR
+  add HL, BC
+  inc A
+  cp 18
+  jr c, .outer_loop
+
   ret
 
 load_tiles:
   RGBG_WaitForVRAM
   ld A, $80
   ld [RGBG_tileset], A
-  ld BC, plasma_tiles
-  ld D, 64
-  ld E, 0
+  ld BC, plasma_tiles ; Plasma tile data address
+  ld D, 64 ; Number of tiles
+  ld E, 0 ; Offset required by RGBG
   call RGBG_LoadTiles
   ret
 
