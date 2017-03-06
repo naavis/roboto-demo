@@ -1,7 +1,7 @@
 INCLUDE "Hardware.inc"
 INCLUDE "rgbgrafx/rgbgrafx.inc"
 
-; $FF90 -> is free
+; NOTE: HRAM $FF90-> is free
 
 Section "Plasma scene",CODE
 scene_plasma::
@@ -47,6 +47,7 @@ scene_plasma::
   ret
 
 plasma_vblank:
+  call update_plasma_buffer
   ld HL, $9800
   call write_plasma_to_vram
   ret
@@ -66,6 +67,29 @@ init_plasma_buffer:
   ldi [HL], A
   dec D
   jr nz, .loop2
+  ret
+
+update_plasma_buffer:
+  ld HL, plasma_buffer
+  ; Get a starting value and a sine value for every tile row
+  ; Then place starting value + column * sine_value to buffer
+  ld B, 18 ; Row counter
+.row_loop:
+  ld A, B
+  call get_sine
+  ld E, A ; Store row-wise sine value in E
+  xor A
+  push BC
+  ld B, 20
+.tile_loop:
+  add E
+  and 63
+  ldi [HL], A
+  dec B
+  jr nz, .tile_loop
+  pop BC
+  dec B
+  jr nz, .row_loop
   ret
 
 write_plasma_to_vram:
@@ -94,6 +118,14 @@ write_plasma_to_vram:
   jr nz, .row_loop
   ret
 
+get_sine:
+  push HL
+  ld H, $31
+  ld L, A
+  ld A, [HL]
+  pop HL
+  ret
+
 load_tiles:
   RGBG_WaitForVRAM
   ld A, $80
@@ -105,6 +137,14 @@ load_tiles:
   ret
 
 INCLUDE "imagedata/plasma_tiles.inc"
+
+Section "Plasma sine LUT",HOME[$3100]
+plasma_sine_lut:
+ANGLE=0.0
+      REPT 256
+      DB (MUL(64.0, SIN(ANGLE))+63.0)>>16
+ANGLE=ANGLE+256.0
+      ENDR
 
 Section "Plasma variables",BSS
 plasma_buffer: DS 360
