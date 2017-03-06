@@ -33,28 +33,32 @@ scene_plasma::
   ; Reset color palette to default
   RGBG_WaitForVRAM
   ld A, %11100100
-  ld [rBGP],A
-  ld [rOBP0],A
-  ld [rOBP1],A
+  ld [rBGP], A
+  ld [rOBP0], A
+  ld [rOBP1], A
   ei
 
 .loop:
   halt
+  ; Update plasma buffer contents
   call update_plasma_buffer
+
+  ; Write buffer contents to VRAM
   ld HL, $9800
   call write_plasma_to_vram
+
+  ; Increment time offset
   ldh A, [TIMEOFFSET]
   inc A
   ldh [TIMEOFFSET], A
+
   jr .loop
   ret
 
 update_plasma_buffer:
   ld HL, plasma_buffer
-  ld D, $00
-  ld B, 18 ; Row counter
+  ld D, 18 ; Row counter
 .row_loop:
-  push BC
   ld B, 20
 .tile_loop:
   ; The magic happens here!
@@ -69,8 +73,7 @@ update_plasma_buffer:
   ldh A, [TIMEOFFSET]
   add E
 
-  ; Add row-specific offset
-  add D
+  add D ; Add row-specific offset
   and 63 ; Keep in range 0-63
   ; Store result
   pop HL
@@ -78,9 +81,7 @@ update_plasma_buffer:
 
   dec B
   jr nz, .tile_loop
-  pop BC
-  inc D
-  dec B
+  dec D
   jr nz, .row_loop
   ret
 
@@ -108,14 +109,6 @@ write_plasma_to_vram:
   pop BC
   dec B ; Decrement row counter
   jr nz, .row_loop
-  ret
-
-get_sine:
-  push HL
-  ld H, $31
-  ld L, A
-  ld A, [HL]
-  pop HL
   ret
 
 load_tiles:
