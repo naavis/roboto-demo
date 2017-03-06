@@ -29,10 +29,6 @@ scene_plasma::
   ; Initialize buffer used for plasma calculations
   call init_plasma_buffer
 
-  ; Set new V-Blank handler
-  ld BC, plasma_vblank
-  call set_vblank_interrupt
-
   ; Reset color palette to default
   RGBG_WaitForVRAM
   ld A, %11100100
@@ -43,13 +39,10 @@ scene_plasma::
 
 .loop:
   halt
-  jr .loop
-  ret
-
-plasma_vblank:
   call update_plasma_buffer
   ld HL, $9800
   call write_plasma_to_vram
+  jr .loop
   ret
 
 init_plasma_buffer:
@@ -73,21 +66,26 @@ update_plasma_buffer:
   ld HL, plasma_buffer
   ; Get a starting value and a sine value for every tile row
   ; Then place starting value + column * sine_value to buffer
+  ld D, $00
   ld B, 18 ; Row counter
 .row_loop:
-  ld A, B
-  call get_sine
-  ld E, A ; Store row-wise sine value in E
-  xor A
   push BC
   ld B, 20
 .tile_loop:
-  add E
+  ; Plasma effect
+  push HL
+  ld H, $31
+  ld L, B
+  ld A, [HL]
+  add D
   and 63
+  pop HL
   ldi [HL], A
+
   dec B
   jr nz, .tile_loop
   pop BC
+  inc D
   dec B
   jr nz, .row_loop
   ret
@@ -141,9 +139,9 @@ INCLUDE "imagedata/plasma_tiles.inc"
 Section "Plasma sine LUT",HOME[$3100]
 plasma_sine_lut:
 ANGLE=0.0
-      REPT 256
-      DB (MUL(64.0, SIN(ANGLE))+63.0)>>16
-ANGLE=ANGLE+256.0
+      REPT 32
+      DB (MUL(32.0, SIN(ANGLE))+31.0)>>16
+ANGLE=ANGLE+2048.0
       ENDR
 
 Section "Plasma variables",BSS
