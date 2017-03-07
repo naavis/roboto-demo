@@ -1,7 +1,6 @@
 INCLUDE "Hardware.inc"
 INCLUDE "rgbgrafx/rgbgrafx.inc"
 
-; NOTE: HRAM $FF90-> is free
 TIME EQU $90
 
 Section "Plasma scene",CODE
