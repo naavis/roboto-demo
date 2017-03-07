@@ -68,18 +68,22 @@ update_plasma_buffer:
   ldh A, [TIME]
   add B
   ld L, A
-  ld A, [HL]
+  ld A, [HL] ; sin(x + time)
   ld E, A
 
-  ld L, D
-  ld A, [HL]
-  add E
+  ld A, [TIME]
+  ld L, A
+  ld A, [HL] ; sin(time)
+  add D
+  ld L, A
+  ld A, [HL] ; sin(sin(time) + y)
+  add E ; sin(sin(time) + y) + sin(x + time)
   ld E, A
 
   ldh A, [TIME]
   add E
   ld L, A
-  ld A, [HL]
+  ld A, [HL] ; sin(time + sin(sin(time) + y) + sin(x + time))
 
   and 63 ; Keep result in range 0-63
   ; Store result A in plasma buffer and increment HL
