@@ -43,23 +43,8 @@ scene_plasma::
   ; Update plasma buffer contents
   call update_plasma_buffer
 
-  ; Write buffer contents to VRAM
-  ; using double buffering.
-  ld L, $00
-  ld A, [rLCDC]
-  bit 3, A
-  jr nz, .write_to_bg9800
-.write_to_bg9c00:
-  ld H, $9C
-  jr .write
-.write_to_bg9800:
-  ld H, $98
-.write
+  ld HL, $9800
   call write_plasma_to_vram
-  ld B, LCDCF_BG9C00
-  ld A, [rLCDC]
-  xor B
-  ld [rLCDC], A
 
   ; Increment time offset
   ldh A, [TIME]
@@ -81,36 +66,20 @@ update_plasma_buffer:
   ld H, $31
 
   ldh A, [TIME]
-  ld L, A
-  ld A, [HL]
-  srl A
-  srl A
-  ; Now A has sin(time)/4
   add B
   ld L, A
   ld A, [HL]
   ld E, A
-  ; Now E has sin(col + sin(time)/4)
 
-  ldh A, [TIME]
-  sub 100
-  ld L, A
-  ld A, [HL]
-  srl A
-  ; Now A has sin(time-100)/2
-  add D
-  ld L, A
+  ld L, D
   ld A, [HL]
   add E
   ld E, A
-  ; Now E has sin(col + sin(time)/4) + sin(sin(time-100)/2+row)
 
   ldh A, [TIME]
-  add A
   add E
   ld L, A
   ld A, [HL]
-  ; Now A has sin(2*time + sin(col + sin(time)/4) + sin(sin(time-100)/2+row))
 
   and 63 ; Keep result in range 0-63
   ; Store result A in plasma buffer and increment HL
