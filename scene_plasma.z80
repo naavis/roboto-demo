@@ -2,7 +2,7 @@ INCLUDE "Hardware.inc"
 INCLUDE "rgbgrafx/rgbgrafx.inc"
 
 ; NOTE: HRAM $FF90-> is free
-TIMEOFFSET EQU $90
+TIME EQU $90
 
 Section "Plasma scene",CODE
 scene_plasma::
@@ -17,7 +17,7 @@ scene_plasma::
   ld [rSCY], A
 
   ; Set time offset to 0
-  ldh [TIMEOFFSET], A
+  ldh [TIME], A
 
   ; Set LCDC register initial values
   ld A, (LCDCF_ON | LCDCF_WINOFF | LCDCF_BG8000 | LCDCF_BG9800 | LCDCF_BGON)
@@ -44,13 +44,27 @@ scene_plasma::
   call update_plasma_buffer
 
   ; Write buffer contents to VRAM
-  ld HL, $9800
+  ; using double buffering.
+  ld L, $00
+  ld A, [rLCDC]
+  bit 3, A
+  jr nz, .write_to_bg9800
+.write_to_bg9c00:
+  ld H, $9C
+  jr .write
+.write_to_bg9800:
+  ld H, $98
+.write
   call write_plasma_to_vram
+  ld B, LCDCF_BG9C00
+  ld A, [rLCDC]
+  xor B
+  ld [rLCDC], A
 
   ; Increment time offset
-  ldh A, [TIMEOFFSET]
+  ldh A, [TIME]
   inc A
-  ldh [TIMEOFFSET], A
+  ldh [TIME], A
 
   jr .loop
   ret
@@ -59,23 +73,47 @@ update_plasma_buffer:
   ld HL, plasma_buffer
   ld D, 18 ; Row counter
 .row_loop:
-  ld B, 20
+  ld B, 20 ; Column counter
 .tile_loop:
   ; The magic happens here!
-  push HL
-  ; Get sine indexed by B
+  push HL ; Store address to current place in plasma buffer
+  ; Point HL to sine lut
   ld H, $31
-  ld L, B
+
+  ldh A, [TIME]
+  ld L, A
   ld A, [HL]
-
-  ; Add time offset to sine result
+  srl A
+  srl A
+  ; Now A has sin(time)/4
+  add B
+  ld L, A
+  ld A, [HL]
   ld E, A
-  ldh A, [TIMEOFFSET]
-  add E
+  ; Now E has sin(col + sin(time)/4)
 
-  add D ; Add row-specific offset
-  and 63 ; Keep in range 0-63
-  ; Store result
+  ldh A, [TIME]
+  sub 100
+  ld L, A
+  ld A, [HL]
+  srl A
+  ; Now A has sin(time-100)/2
+  add D
+  ld L, A
+  ld A, [HL]
+  add E
+  ld E, A
+  ; Now E has sin(col + sin(time)/4) + sin(sin(time-100)/2+row)
+
+  ldh A, [TIME]
+  add A
+  add E
+  ld L, A
+  ld A, [HL]
+  ; Now A has sin(2*time + sin(col + sin(time)/4) + sin(sin(time-100)/2+row))
+
+  and 63 ; Keep result in range 0-63
+  ; Store result A in plasma buffer and increment HL
   pop HL
   ldi [HL], A
 
@@ -126,8 +164,8 @@ INCLUDE "imagedata/plasma_tiles.inc"
 Section "Plasma sine LUT",HOME[$3100]
 plasma_sine_lut:
 ANGLE=0.0
-      REPT 64
-      DB (MUL(16.0, SIN(ANGLE))+16.0)>>16
+      REPT 256
+      DB (MUL(32.0, SIN(ANGLE))+32.0)>>16
 ANGLE=ANGLE+1024.0
       ENDR
 
