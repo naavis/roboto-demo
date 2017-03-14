@@ -25,8 +25,8 @@ main:
   ld [music_playing], A
   ; Begin showing actual scenes
   call scene_skrolli_logo
-  call scene_twister
   call scene_lissajous
+  call scene_twister
   call scene_plasma
 
 

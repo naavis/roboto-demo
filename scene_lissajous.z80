@@ -17,9 +17,23 @@ scene_lissajous::
   ; Reset interrupt handlers
   call initialize_interrupts
 
-  ; Enable V-blank interrupts
-  ld A, IEF_VBLANK
+  ; Enable V-blank and timer interrupts
+  ld A, IEF_VBLANK | IEF_TIMER
   ld [rIE], A
+
+  ; When timer interrupt triggers, load 0 to TIMA
+  xor A
+  ld [rTMA], A
+  ; Initialize timer variable to zero
+  ld [timer], A
+
+  ; Set timer to increment 4096 times a second
+  ld A, 4
+  ld [rTAC], A
+
+  ; Set timer interrupt
+  ld BC, lissajous_timer
+  call set_timer_interrupt
 
   ; Configure LCD controller
   ld A, (LCDCF_ON | LCDCF_WINOFF | LCDCF_BG8000 | LCDCF_BGOFF | LCDCF_OBJ8 | LCDCF_OBJON)
@@ -78,7 +92,17 @@ scene_lissajous::
 
 .loop:
   halt
-  jr .loop
+  ld A, [timer]
+  ; Exit after 64 / 16 = 4 seconds
+  cp 64
+  jr nz, .loop
+  ret
+
+lissajous_timer:
+  ld A, [timer]
+  inc A
+  ld [timer], A
+  ret
 
 lissajous_vblank:
   ld A, [rotation]
@@ -152,3 +176,4 @@ ANGLE   SET     ANGLE+256.0
 Section "Lissajous variables",BSS
 frame_number: DS 1
 rotation: DS 1
+timer: DS 1
