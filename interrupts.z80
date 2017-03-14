@@ -15,6 +15,9 @@ Section "RST 08",HOME[$08]
 Section "V-Blank ISR",HOME[$40]
   jp VBlank
 
+Section "Timer ISR",HOME[$50]
+  jp Timer
+
 Section "LCDC ISR",HOME[$48]
   jp LCDC
 
@@ -39,6 +42,14 @@ LCDC:
   push DE
   push HL
   ld HL, LCDC_Address
+  jr interrupt_common
+
+Timer:
+  push AF
+  push BC
+  push DE
+  push HL
+  ld HL, Timer_Address
   jr interrupt_common
 
 interrupt_common:
@@ -78,6 +89,11 @@ set_lcdc_interrupt::
   ld HL, LCDC_Address
   jr interrupt_setter_common
 
+; BC = funtion pointer
+set_timer_interrupt::
+  ld HL, Timer_Address
+  jr interrupt_setter_common
+
 interrupt_setter_common:
   di
   ld [HL], C
@@ -89,6 +105,7 @@ interrupt_setter_common:
 Section "Interrupt handler addresses",BSS
 VBlank_Address: DS 2
 LCDC_Address: DS 2
+Timer_Address: DS 2
 ; music_playing == 0, music not playing
 ; music_playing == 1, music is playing
 music_playing:: DS 1
