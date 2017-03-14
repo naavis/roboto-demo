@@ -91,7 +91,7 @@ scene_skrolli_logo::
   cp 166 ; Visible portion of window ends at rWX == 166
   jr nz, .loop
 
-  ld A, $D0
+  ld A, $FF
 .delay_loop:
   halt
   dec A
