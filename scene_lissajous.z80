@@ -96,6 +96,10 @@ scene_lissajous::
   ; Exit after 64 / 16 = 4 seconds
   cp 64
   jr nz, .loop
+  ; Disable sprites
+  ld A, [rLCDC]
+  and %11111101
+  ld [rLCDC], A
   ret
 
 lissajous_timer:
