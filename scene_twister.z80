@@ -123,7 +123,9 @@ twister_lcdc:
   ; Add offset to raster line number
   add B
   ; Get sine(rasterline + offset) and store in A
-  call get_sine
+  ld H, $30
+  ld L, A
+  ld A, [HL]
   ; Keep sine in range 0-63
   cp 63
   jr c, .in_range
@@ -146,12 +148,6 @@ twister_lcdc:
   xor A
 .in_frame:
   ld [rLYC], A
-  ret
-
-get_sine:
-  ld H, $30
-  ld L, A
-  ld A, [HL]
   ret
 
 Section "Sine LUT",HOME[$3000] ; Alignment to 00 important
