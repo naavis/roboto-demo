@@ -56,10 +56,6 @@ scene_twister::
   ld A, 4
   ld [rTAC], A
 
-  ; Set timer interrupt
-  ld BC, twister_timer
-  call set_timer_interrupt
-
   ; Set proper values for LCDC register
   ld A, (LCDCF_ON | LCDCF_WINOFF | LCDCF_BG8000 | LCDCF_BG9800 | LCDCF_BGON)
   ld [rLCDC], A
@@ -69,18 +65,24 @@ scene_twister::
   ld [rSTAT], A
 
   ; Enable VBlank, LCDC and Timer interrupts
-  ld a, (IEF_LCDC | IEF_VBLANK | IEF_TIMER)
+  ld A, (IEF_LCDC | IEF_VBLANK | IEF_TIMER)
   ld [rIE], A
+  ei
 
+  ; Set V-blank interrupt
   ld BC, twister_vblank
   call set_vblank_interrupt
 
+  ; Set LCDC interrupt
   ld BC, twister_lcdc
   call set_lcdc_interrupt
-  ei
+
+  ; Set timer interrupt
+  ld BC, twister_timer
+  call set_timer_interrupt
 
   ; Initialize LYC to $00
-  ld A, $00
+  xor A
   ld [rLYC], A
   ; Set twister_offset to zero at start
   ld [twister_offset], A
