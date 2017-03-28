@@ -103,16 +103,15 @@ scene_twister::
   ret
 
 twister_timer:
-  ld A, [timer]
-  inc A
-  ld [timer], A
+  ei
+  ld HL, timer
+  inc [HL]
   ret
 
 twister_vblank:
   ; Increment twister_offset
-  ld A, [twister_offset]
-  inc A
-  ld [twister_offset], A
+  ld HL, twister_offset
+  inc [HL]
   ret
 
 twister_lcdc:
