@@ -46,6 +46,7 @@ scene_twister::
   ld [rSCX], A
   ld [rSCY], A
 
+  di
   ; When timer interrupt triggers, load 0 to TIMA
   ld [rTMA], A
   ; Initialize timer variable to zero
@@ -68,11 +69,7 @@ scene_twister::
   ld [rSTAT], A
 
   ; Enable VBlank, LCDC and Timer interrupts
-  di
-  ld A, [rIE]
-  and %11110000
-  ld B, (IEF_LCDC | IEF_VBLANK | IEF_TIMER)
-  or B
+  ld a, (IEF_LCDC | IEF_VBLANK | IEF_TIMER)
   ld [rIE], A
 
   ld BC, twister_vblank
