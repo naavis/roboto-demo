@@ -46,6 +46,19 @@ scene_twister::
   ld [rSCX], A
   ld [rSCY], A
 
+  ; When timer interrupt triggers, load 0 to TIMA
+  ld [rTMA], A
+  ; Initialize timer variable to zero
+  ld [timer], A
+
+  ; Set timer to increment 4096 times a second
+  ld A, 4
+  ld [rTAC], A
+
+  ; Set timer interrupt
+  ld BC, twister_timer
+  call set_timer_interrupt
+
   ; Set proper values for LCDC register
   ld A, (LCDCF_ON | LCDCF_WINOFF | LCDCF_BG8000 | LCDCF_BG9800 | LCDCF_BGON)
   ld [rLCDC], A
@@ -54,11 +67,11 @@ scene_twister::
   ld A, (STATF_LYC)
   ld [rSTAT], A
 
-  ; Enable VBlank and LCDC interrupts
+  ; Enable VBlank, LCDC and Timer interrupts
   di
   ld A, [rIE]
   and %11110000
-  ld B, (IEF_LCDC | IEF_VBLANK)
+  ld B, (IEF_LCDC | IEF_VBLANK | IEF_TIMER)
   or B
   ld [rIE], A
 
@@ -84,7 +97,16 @@ scene_twister::
 
 .loop:
   halt
-  jr .loop
+  ld A, [timer]
+  ; Exit after 80 / 16 = 5 seconds
+  cp 80
+  jr nz, .loop
+  ret
+
+twister_timer:
+  ld A, [timer]
+  inc A
+  ld [timer], A
   ret
 
 twister_vblank:
@@ -146,3 +168,4 @@ ANGLE=ANGLE+256.0
 
 Section "Twister variables",BSS
 twister_offset: DS 1
+timer: DS 1
