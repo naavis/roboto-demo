@@ -140,14 +140,14 @@ twister_lcdc:
   ; Store result in Y scroll register
   ld [rSCY], A
   ; Increment LYC to trigger interrupt again at next scanline
-  ld A, [rLYC]
-  inc A
+  ld HL, rLYC
+  inc [HL]
+  ld A, [HL]
   cp 144
   jr c, .in_frame
   ; If at row 144, set LYC to 0
-  xor A
+  ld [HL], 0
 .in_frame:
-  ld [rLYC], A
   ret
 
 Section "Sine LUT",HOME[$3000] ; Alignment to 00 important
