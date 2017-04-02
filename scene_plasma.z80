@@ -24,6 +24,7 @@ scene_plasma::
   ; Enable VBlank and LCDC interrupts
   ld A, (IEF_LCDC | IEF_VBLANK)
   ld [rIE], A
+  ei
 
   ; Reset background scroll registers
   xor A
@@ -39,7 +40,6 @@ scene_plasma::
   ld [rBGP], A
   ld [rOBP0], A
   ld [rOBP1], A
-  ei
 
 .loop:
   halt
