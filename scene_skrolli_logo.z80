@@ -27,9 +27,8 @@ scene_skrolli_logo::
   ld E, 32 ; Width of area in VRAM to set
   RGBG_WaitForVRAM
   call RGBG_FillTileMap
-  ld A, [rLCDC]
-  or LCDCF_WINON ; Enable window
-  or LCDCF_WIN9C00 ; Use tilemap in $9C00-$9FFF for window
+  ; Set LCD control parameters
+  ld A, (LCDCF_ON | LCDCF_WIN9C00 | LCDCF_WINON | LCDCF_BGON | LCDCF_BG9800 | LCDCF_BG8000)
   ld [rLCDC], A
 
   ; Initialize high byte of the tileset starting address
