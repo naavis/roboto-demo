@@ -110,28 +110,30 @@ lissajous_timer:
 
 lissajous_vblank:
   ld A, [rotation]
-  ld H, A
+  ld H, A ; Set rotation to H
   ld A, [frame_number] ; Get frame number to index LUTs
   ld D, A ; Save frame number to D
   ld E, 40 ; Use E as sprite counter
 
 .loop_start:
-  swap E
+  swap E ; Multiply sprite counter with 16 to use as offset
   ld A, D ; Load frame number to A
   add E
   add A
   add H
+  ; Total index is now 2 * frame_number + 16 * sprite_counter + rotation
   call get_sine
-  add 20
-  ld B, A ; Set first sine value to X
+  add 20 ; Center resulting curve by offsetting with 20 pixels
+  ld B, A ; Set first sine value to X coordinate
 
   ld A, D ; Load frame number to A
   add E
+  ; Total index is now frame_number + 16 * sprite_counter
   call get_sine ; Get sine value and save it to A
-  add 20
+  add 20 ; Center resulting curve by offsetting with 20 pixels
   ld C, A ; Set second sine value to Y coordinate
 
-  swap E
+  swap E ; Restore sprite number by dividing with 16
   ld A, E
   push HL
   call RGBG_SetSpritePos ; Save sprite position
