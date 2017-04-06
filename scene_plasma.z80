@@ -63,30 +63,36 @@ update_plasma_buffer:
 .row_loop:
   ld B, 20 ; Column counter
 .tile_loop:
-  ; The magic happens here!
   push HL ; Store address to current place in plasma buffer
   ; Point HL to sine lut
   ld H, $31
 
+  ; The magic happens here!
+  ldh A, [TIME]
+  ld L, A
+  ld A, [HL]
+  add B
+  add 10
+  ld L, A
+  ld A, [HL] ; sin(x + time + 10)
+  ld E, A
+
+  ldh A, [TIME]
+  add D
+  add 100
+  ld L, A
+  ld A, [HL]
+  add E ; sin(x + time + 10) + sin(y + time + 100)
+  ld E, A
+
   ldh A, [TIME]
   add B
+  sub D
   ld L, A
-  ld A, [HL] ; sin(x + time)
-  ld E, A
+  ld A, [HL]
+  add E ; sin(x + time + 10) + sin(y + time + 100) + sin(x - y + time)
 
-  ldh A, [TIME]
-  ld L, A
-  ld A, [HL] ; sin(time)
-  add D
-  ld L, A
-  ld A, [HL] ; sin(sin(time) + y)
-  add E ; sin(sin(time) + y) + sin(x + time)
-  ld E, A
-
-  ldh A, [TIME]
-  add E
-  ld L, A
-  ld A, [HL] ; sin(time + sin(sin(time) + y) + sin(x + time))
+  ; The magic ends here!
 
   and 63 ; Keep result in range 0-63
   ; Store result A in plasma buffer and increment HL
