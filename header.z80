@@ -7,7 +7,7 @@ Section "CartHeader",HOME[$104]
   DB "OK" ; $0144-$0145: New licensee code
   DB $00 ; $0146: SGB Compatibility Flag
   DB CART_ROM ; $0147: Cartride type
-  DB $00 ; $0148: ROM size, $00 means 32K
+  DB CART_ROM_256K ; $0148: ROM size, 256 kilobits = 32 kilobytes
   DB CART_RAM_NONE ; $0149: RAM size
   DB $01 ; $014A: Destination code, $00 is Japanese, $01 is international
   DB $33 ; $014B: Old licensee code, $33 means new code is used
