@@ -74,7 +74,7 @@ update_plasma_buffer:
   ld A, [HL] ; sin(x + time)
   ld E, A
 
-  ld A, [TIME]
+  ldh A, [TIME]
   ld L, A
   ld A, [HL] ; sin(time)
   add D
