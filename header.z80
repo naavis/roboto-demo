@@ -2,8 +2,7 @@ INCLUDE "Hardware.inc"
 
 Section "CartHeader",HOME[$104]
   NINTENDO_LOGO ; $0104 - $0133: The Nintendo Logo.
-  DB "SKROLLIDEMO" ; $0134 - $0143: Cart title
-  DB "NAAV" ; $013F-$0142: Manufacturer code
+  DB "SKROLLIDEMO    " ; $0134 - $0142: Cart title
   DB $00 ; $0143: CGB Compatibility flag
   DB "OK" ; $0144-$0145: New licensee code
   DB $00 ; $0146: SGB Compatibility Flag
