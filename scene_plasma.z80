@@ -54,7 +54,8 @@ scene_plasma::
   inc A
   ldh [TIME], A
 
-  jr .loop
+  cp 255 ; End scene after 256 frames.
+  jr nz, .loop
   ret
 
 update_plasma_buffer:
