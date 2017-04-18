@@ -97,8 +97,8 @@ scene_twister::
 .loop:
   halt
   ld A, [timer]
-  ; Exit after 80 / 16 = 5 seconds
-  cp 80
+  ; Exit after 160 / 16 = 10 seconds
+  cp 160
   jr nz, .loop
   ret
 

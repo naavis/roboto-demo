@@ -129,8 +129,8 @@ scene_lissajous::
 .loop:
   halt
   ld A, [timer]
-  ; Exit after 96 / 16 = 6 seconds
-  cp 96
+  ; Exit after 160 / 16 = 10 seconds
+  cp 160
   jr nz, .loop
   ; Disable sprites
   ld A, [rLCDC]
