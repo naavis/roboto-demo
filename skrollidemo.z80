@@ -28,6 +28,7 @@ main:
   call scene_lissajous
   call scene_twister
   call scene_plasma
+  call scene_credits
 
 
 .loop:

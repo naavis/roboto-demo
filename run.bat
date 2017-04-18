@@ -40,6 +40,9 @@ rgbasm.exe -o build/scene_skrolli_logo.o scene_skrolli_logo.z80
 rgbasm.exe -o build/scene_nintendo_logo_slide.o scene_nintendo_logo_slide.z80
 @if errorlevel 1 goto error
 
+rgbasm.exe -o build/scene_credits.o scene_credits.z80
+@if errorlevel 1 goto error
+
 rgbasm.exe -i rgbgrafx/ -o build/maps.o rgbgrafx/maps.z80
 @if errorlevel 1 goto error
 
