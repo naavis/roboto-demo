@@ -1,12 +1,13 @@
 INCLUDE "Hardware.inc"
 INCLUDE "rgbgrafx/rgbgrafx.inc"
 
-Section "Robot image data",data
+Section "Robot image data",DATA
 INCLUDE "imagedata/robot.inc"
 
 Section "Lissajous curve scene",CODE
 scene_lissajous::
   xor A
+  ld [slide_done], A
   ld [frame_number], A
   ld [rotation], A
 
@@ -44,7 +45,7 @@ scene_lissajous::
   call RGBG_SetTileMap
 
   ; Position background image
-  ld A, 85
+  xor A
   ld [rSCX], A
 
   di ; Disable interrupts during setup
@@ -148,8 +149,25 @@ lissajous_vblank:
   ld H, A ; Set rotation to H
   ld A, [frame_number] ; Get frame number to index LUTs
   ld D, A ; Save frame number to D
-  ld E, 40 ; Use E as sprite counter
 
+  ; Slide robot image in
+  ld A, [slide_done]
+  cp 0
+  jr nz, .slide_end
+  ld A, D
+  cp 64
+  jr c, .keep_sliding
+  ld A, 1
+  ld [slide_done], A
+  jr .slide_end
+.keep_sliding:
+  call get_sine
+  add A
+  sub 25
+  ld [rSCX], A
+.slide_end:
+
+  ld E, 40 ; Use E as sprite counter
 .loop_start:
   swap E ; Multiply sprite counter with 16 to use as offset
   ld A, D ; Load frame number to A
@@ -218,3 +236,4 @@ Section "Lissajous variables",BSS
 frame_number: DS 1
 rotation: DS 1
 timer: DS 1
+slide_done: DS 1
