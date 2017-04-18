@@ -1,9 +1,11 @@
 INCLUDE "Hardware.inc"
 INCLUDE "rgbgrafx/rgbgrafx.inc"
 
+Section "Robot image data",data
+INCLUDE "imagedata/robot.inc"
+
 Section "Lissajous curve scene",CODE
 scene_lissajous::
-  di ; Disable interrupts during setup
   xor A
   ld [frame_number], A
   ld [rotation], A
@@ -13,6 +15,39 @@ scene_lissajous::
   ld A, $FF
   ld [rBGP], A
   ld [rOBP0], A
+
+  ; Initialize high byte of the tileset starting address
+  ld A, $88
+  ld [RGBG_tileset], A
+  ; Load tile patterns to VRAM
+  ld BC, robot_tile_data
+  ld D, $FF
+  ld E, 0
+  RGBG_WaitForVRAM
+  call RGBG_LoadTiles
+
+  ; Initialize high byte of the tilemap starting address
+  ld A, $98
+  ld [RGBG_tilemap], A
+
+  ; Set tilemap offset
+  ld A, 128
+  ld [RGBG_map_offset], A
+
+  ; Load tile map
+  RGBG_WaitForVRAM
+  ld BC, robot_map_data
+  ld H, $0
+  ld L, $0
+  ld E, robot_tile_map_width
+  ld D, robot_tile_map_height
+  call RGBG_SetTileMap
+
+  ; Position background image
+  ld A, 85
+  ld [rSCX], A
+
+  di ; Disable interrupts during setup
 
   ; Reset interrupt handlers
   call initialize_interrupts
@@ -36,10 +71,10 @@ scene_lissajous::
   call set_timer_interrupt
 
   ; Configure LCD controller
-  ld A, (LCDCF_ON | LCDCF_WINOFF | LCDCF_BG8000 | LCDCF_BGOFF | LCDCF_OBJ8 | LCDCF_OBJON)
+  ld A, (LCDCF_ON | LCDCF_WINOFF | LCDCF_BG8800 | LCDCF_BG9800 | LCDCF_BGON | LCDCF_OBJ8 | LCDCF_OBJON)
   ld [rLCDC], A
 
-  ; Initialize high byte of the tileset starting address
+  ; Initialize high byte of the sprite tileset starting address
   ld A, $80
   ld [RGBG_tileset], A
 
@@ -93,8 +128,8 @@ scene_lissajous::
 .loop:
   halt
   ld A, [timer]
-  ; Exit after 64 / 16 = 4 seconds
-  cp 64
+  ; Exit after 96 / 16 = 6 seconds
+  cp 96
   jr nz, .loop
   ; Disable sprites
   ld A, [rLCDC]
@@ -123,14 +158,14 @@ lissajous_vblank:
   add H
   ; Total index is now 2 * frame_number + 16 * sprite_counter + rotation
   call get_sine
-  add 20 ; Center resulting curve by offsetting with 20 pixels
+  add 20 ; Position resulting curve by offsetting with 20 pixels
   ld B, A ; Set first sine value to X coordinate
 
   ld A, D ; Load frame number to A
   add E
   ; Total index is now frame_number + 16 * sprite_counter
   call get_sine ; Get sine value and save it to A
-  add 20 ; Center resulting curve by offsetting with 20 pixels
+  add 40 ; Position resulting curve by offsetting with 50 pixels
   ld C, A ; Set second sine value to Y coordinate
 
   swap E ; Restore sprite number by dividing with 16
@@ -175,7 +210,7 @@ Section "Sine lookup-table",HOME[$2F00] ; Alignment to 00 important
 sine_lut:
 ANGLE   SET     0.0
         REPT    256
-        DB      (MUL(64.0,SIN(ANGLE))+64.0)>>16
+        DB      (MUL(30.0,SIN(ANGLE))+30.0)>>16
 ANGLE   SET     ANGLE+256.0
         ENDR
 
