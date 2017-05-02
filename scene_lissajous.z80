@@ -133,12 +133,10 @@ scene_lissajous::
   cp 160
   jr nz, .loop
 
-  call fade_to_black
-
 .fade1_loop:
   halt
   ld A, [timer]
-  cp 164
+  cp 162
   jr nz, .fade1_loop
 
   call fade_to_black
@@ -146,7 +144,7 @@ scene_lissajous::
 .fade2_loop:
   halt
   ld A, [timer]
-  cp 168
+  cp 164
   jr nz, .fade2_loop
 
   call fade_to_black
@@ -154,7 +152,7 @@ scene_lissajous::
 .fade3_loop:
   halt
   ld A, [timer]
-  cp 172
+  cp 166
   jr nz, .fade3_loop
 
   call fade_to_black

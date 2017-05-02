@@ -63,8 +63,6 @@ scene_plasma::
   cp 255 ; Start fadeout after 256 frames.
   jr nz, .loop
 
-  call fade_to_black
-
 .fade1_loop:
   halt
   ; Update plasma buffer contents
