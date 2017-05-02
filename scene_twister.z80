@@ -87,8 +87,34 @@ scene_twister::
   ; Set twister_offset to zero at start
   ld [twister_offset], A
 
-  ; Reset color palette to default
-  RGBG_WaitForVRAM
+.fade_in_loop1:
+  halt
+  ld A, [timer]
+  cp 4
+  jr nz, .fade_in_loop1
+
+  ld A, %11111110
+  ld [rBGP], A
+  ld [rOBP0], A
+  ld [rOBP1], A
+
+.fade_in_loop2:
+  halt
+  ld A, [timer]
+  cp 8
+  jr nz, .fade_in_loop2
+
+  ld A, %11111001
+  ld [rBGP], A
+  ld [rOBP0], A
+  ld [rOBP1], A
+
+.fade_in_loop3:
+  halt
+  ld A, [timer]
+  cp 12
+  jr nz, .fade_in_loop3
+
   ld A, %11100100
   ld [rBGP], A
   ld [rOBP0], A
