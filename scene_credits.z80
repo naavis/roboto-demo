@@ -48,6 +48,8 @@ scene_credits::
   ; Reset background scroll registers
   xor A
   ld [rSCX], A
+  ; Start with image out of view
+  ld A, 128
   ld [rSCY], A
 
   ; Reset color palette to default
@@ -59,6 +61,13 @@ scene_credits::
 
 .loop:
   halt
-  jr nz, .loop
+  ; Scroll image up
+  RGBG_WaitVBL
+  ld A, [rSCY]
+  cp 0
+  jr z, .loop
+  inc A
+  ld [rSCY], A
+  jr .loop
 
   ret
