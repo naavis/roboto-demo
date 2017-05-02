@@ -19,6 +19,9 @@ mod2gbt.exe music/skrolli_anthem.mod skrolli_anthem
 rgbasm.exe -o build/header.o header.z80
 @if errorlevel 1 goto error
 
+rgbasm.exe -o build/utils.o utils.z80
+@if errorlevel 1 goto error
+
 rgbasm.exe -o build/skrollidemo.o skrollidemo.z80
 @if errorlevel 1 goto error
 

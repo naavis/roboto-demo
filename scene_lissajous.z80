@@ -165,16 +165,6 @@ scene_lissajous::
   ld [rLCDC], A
   ret
 
-fade_to_black:
-  RGBG_WaitForVRAM
-  ld A, [rBGP]
-  sra A
-  sra A
-  ld [rBGP], A
-  ld [rOBP0], A
-  ld [rOBP1], A
-  ret
-
 lissajous_timer:
   ld A, [timer]
   inc A

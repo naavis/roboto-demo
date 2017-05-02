@@ -1,0 +1,11 @@
+INCLUDE "Hardware.inc"
+
+Section "Utilities",CODE
+fade_to_black::
+  ld A, [rBGP]
+  sra A
+  sra A
+  ld [rBGP], A
+  ld [rOBP0], A
+  ld [rOBP1], A
+  ret
