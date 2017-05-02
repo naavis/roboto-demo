@@ -129,13 +129,50 @@ scene_lissajous::
 .loop:
   halt
   ld A, [timer]
-  ; Exit after 160 / 16 = 10 seconds
+  ; Start fading out after 160 / 16 = 10 seconds
   cp 160
   jr nz, .loop
+
+  call fade_to_black
+
+.fade1_loop:
+  halt
+  ld A, [timer]
+  cp 164
+  jr nz, .fade1_loop
+
+  call fade_to_black
+
+.fade2_loop:
+  halt
+  ld A, [timer]
+  cp 168
+  jr nz, .fade2_loop
+
+  call fade_to_black
+
+.fade3_loop:
+  halt
+  ld A, [timer]
+  cp 172
+  jr nz, .fade3_loop
+
+  call fade_to_black
+
   ; Disable sprites
   ld A, [rLCDC]
   and %11111101
   ld [rLCDC], A
+  ret
+
+fade_to_black:
+  RGBG_WaitForVRAM
+  ld A, [rBGP]
+  sra A
+  sra A
+  ld [rBGP], A
+  ld [rOBP0], A
+  ld [rOBP1], A
   ret
 
 lissajous_timer:
