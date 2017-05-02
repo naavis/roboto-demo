@@ -34,6 +34,12 @@ scene_plasma::
   ; Load tiles into VRAM
   call load_tiles
 
+  ; Draw one screen before changing palette
+  call update_plasma_buffer
+
+  ld HL, $9800
+  call write_plasma_to_vram
+
   ; Reset color palette to default
   RGBG_WaitForVRAM
   ld A, %11100100

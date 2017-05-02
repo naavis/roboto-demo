@@ -1,7 +1,9 @@
 INCLUDE "Hardware.inc"
+INCLUDE "rgbgrafx/rgbgrafx.inc"
 
 Section "Utilities",CODE
 fade_to_black::
+  RGBG_WaitForVRAM
   ld A, [rBGP]
   sra A
   sra A

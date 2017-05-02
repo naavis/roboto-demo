@@ -123,9 +123,36 @@ scene_twister::
 .loop:
   halt
   ld A, [timer]
-  ; Exit after 160 / 16 = 10 seconds
+  ; Start fading out after 160 / 16 = 10 seconds
   cp 160
   jr nz, .loop
+
+  call fade_to_black
+
+.fade1_loop:
+  halt
+  ld A, [timer]
+  cp 164
+  jr nz, .fade1_loop
+
+  call fade_to_black
+
+.fade2_loop:
+  halt
+  ld A, [timer]
+  cp 168
+  jr nz, .fade2_loop
+
+  call fade_to_black
+
+.fade3_loop:
+  halt
+  ld A, [timer]
+  cp 172
+  jr nz, .fade3_loop
+
+  call fade_to_black
+
   ret
 
 twister_timer:
