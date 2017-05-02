@@ -60,8 +60,52 @@ scene_plasma::
   inc A
   ldh [TIME], A
 
-  cp 255 ; End scene after 256 frames.
+  cp 255 ; Start fadeout after 256 frames.
   jr nz, .loop
+
+  call fade_to_black
+
+.fade1_loop:
+  halt
+  ; Update plasma buffer contents
+  call update_plasma_buffer
+  ld HL, $9800
+  call write_plasma_to_vram
+  ldh A, [TIME]
+  inc A
+  ldh [TIME], A
+  cp 5
+  jr nz, .fade1_loop
+
+  call fade_to_black
+
+.fade2_loop:
+  halt
+  ; Update plasma buffer contents
+  call update_plasma_buffer
+  ld HL, $9800
+  call write_plasma_to_vram
+  ldh A, [TIME]
+  inc A
+  ldh [TIME], A
+  cp 10
+  jr nz, .fade2_loop
+
+  call fade_to_black
+
+.fade3_loop:
+  halt
+  call update_plasma_buffer
+  ld HL, $9800
+  call write_plasma_to_vram
+  ldh A, [TIME]
+  inc A
+  ldh [TIME], A
+  cp 15
+  jr nz, .fade3_loop
+
+  call fade_to_black
+
   ret
 
 update_plasma_buffer:
