@@ -3,7 +3,7 @@ INCLUDE "rgbgrafx/rgbgrafx.inc"
 
 Section "Utilities",CODE
 fade_to_black::
-  RGBG_WaitForVRAM
+  RGBG_WaitVBL
   ld A, [rBGP]
   sra A
   sra A
