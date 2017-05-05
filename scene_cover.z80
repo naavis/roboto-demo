@@ -25,8 +25,6 @@ scene_cover::
   ld [rIE], A
   ei
 
-
-
   ; Set all palette colors to black for the duration of loading image data
   RGBG_WaitForVRAM
   ld A, $FF
