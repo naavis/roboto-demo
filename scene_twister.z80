@@ -90,9 +90,10 @@ scene_twister::
 .fade_in_loop1:
   halt
   ld A, [timer]
-  cp 4
+  cp 2
   jr nz, .fade_in_loop1
 
+  RGBG_WaitVBL
   ld A, %11111110
   ld [rBGP], A
   ld [rOBP0], A
@@ -101,9 +102,10 @@ scene_twister::
 .fade_in_loop2:
   halt
   ld A, [timer]
-  cp 8
+  cp 4
   jr nz, .fade_in_loop2
 
+  RGBG_WaitVBL
   ld A, %11111001
   ld [rBGP], A
   ld [rOBP0], A
@@ -112,9 +114,10 @@ scene_twister::
 .fade_in_loop3:
   halt
   ld A, [timer]
-  cp 12
+  cp 6
   jr nz, .fade_in_loop3
 
+  RGBG_WaitVBL
   ld A, %11100100
   ld [rBGP], A
   ld [rOBP0], A
