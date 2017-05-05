@@ -1,0 +1,93 @@
+INCLUDE "Hardware.inc"
+INCLUDE "rgbgrafx/rgbgrafx.inc"
+
+Section "Magazine cover data",HOME
+INCLUDE "imagedata/magazine_cover.inc"
+
+Section "Magazine cover scene",CODE
+scene_cover::
+  di
+  ; When timer interrupt triggers, load 0 to TIMA
+  xor A
+  ld [rTMA], A
+  ; Initialize timer variable to zero
+  ld [timer], A
+
+  ; Reset interrupt handlers
+  call initialize_interrupts
+
+  ; Set timer interrupt
+  ld BC, cover_timer
+  call set_timer_interrupt
+
+  ; Enable V-blank and timer interrupts
+  ld A, IEF_VBLANK | IEF_TIMER
+  ld [rIE], A
+  ei
+
+
+
+  ; Set all palette colors to black for the duration of loading image data
+  RGBG_WaitForVRAM
+  ld A, $FF
+  ld [rBGP], A
+
+  ; Set LCD control parameters
+  ld A, (LCDCF_ON | LCDCF_WINOFF | LCDCF_BGON | LCDCF_BG9800 | LCDCF_BG8000)
+  ld [rLCDC], A
+
+  ; Initialize high byte of the tileset starting address
+  ld A, $80
+  ld [RGBG_tileset], A
+  ; Load tile patterns to VRAM
+  ld BC, magazine_cover_tile_data
+  ld D, $FF
+  ld E, 0
+  RGBG_WaitForVRAM
+  call RGBG_LoadTiles
+
+  ; Initialize high byte of the tilemap starting address
+  ld A, $98
+  ld [RGBG_tilemap], A
+
+  ; Set tilemap offset to zero
+  xor A
+  ld [RGBG_map_offset], A
+
+  ; Load tile map
+  RGBG_WaitForVRAM
+  ld BC, magazine_cover_map_data
+  ld H, $0
+  ld L, $0
+  ld E, magazine_cover_tile_map_width
+  ld D, magazine_cover_tile_map_height
+  call RGBG_SetTileMap
+
+  ; Reset background scroll registers
+  xor A
+  ld [rSCX], A
+  ld [rSCY], A
+
+  ; Reset color palette to default
+  RGBG_WaitForVRAM
+  ld A, %11100100
+  ld [rBGP], A
+  ld [rOBP0], A
+  ld [rOBP1], A
+
+.loop:
+  halt
+  ld A, [timer]
+  cp 160
+  jr nz, .loop
+
+  ret
+
+cover_timer:
+  ld A, [timer]
+  inc A
+  ld [timer], A
+  ret
+
+Section "Magazine cover variables",BSS
+timer: DS 1
