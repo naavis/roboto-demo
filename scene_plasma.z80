@@ -37,6 +37,7 @@ scene_plasma::
   ; Draw one screen before changing palette
   call update_plasma_buffer
 
+  RGBG_WaitVBL
   ld HL, $9800
   call write_plasma_to_vram
 
@@ -48,10 +49,10 @@ scene_plasma::
   ld [rOBP1], A
 
 .loop:
-  halt
   ; Update plasma buffer contents
   call update_plasma_buffer
 
+  RGBG_WaitVBL
   ld HL, $9800
   call write_plasma_to_vram
 
@@ -64,9 +65,9 @@ scene_plasma::
   jr nz, .loop
 
 .fade1_loop:
-  halt
   ; Update plasma buffer contents
   call update_plasma_buffer
+  RGBG_WaitVBL
   ld HL, $9800
   call write_plasma_to_vram
   ldh A, [TIME]
@@ -78,9 +79,9 @@ scene_plasma::
   call fade_to_black
 
 .fade2_loop:
-  halt
   ; Update plasma buffer contents
   call update_plasma_buffer
+  RGBG_WaitVBL
   ld HL, $9800
   call write_plasma_to_vram
   ldh A, [TIME]
@@ -92,8 +93,8 @@ scene_plasma::
   call fade_to_black
 
 .fade3_loop:
-  halt
   call update_plasma_buffer
+  RGBG_WaitVBL
   ld HL, $9800
   call write_plasma_to_vram
   ldh A, [TIME]
