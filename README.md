@@ -10,7 +10,7 @@ The assembly code is written for [RGBDS assembler](https://github.com/rednex/rgb
 
 Project structure
 -----------------
-The starting point of the program is in the file [skrollidemo.z80](skrollidemo.z80). Interrupt boilerplate code can be found in [interrupts.z80](interrupts.z80) file.
+The starting point of the program is in the file [skrollidemo.z80](skrollidemo.z80). Interrupt boilerplate code can be found in [interrupts.z80](interrupts.z80) file. Cartridge header can be found in [header.z80](header.z80).
 
 The demo is divided into separate scenes, which reside in their respective `scene_*.z80` files.
 
