@@ -3,7 +3,7 @@ INCLUDE "gbt_player/gbt_player.inc"
 Section "Initializer",HOME[$100]
   jp main
 
-Section "MainCode",HOME[$150]
+Section "Main Code",HOME[$150]
 main:
   ; Don't play music during the Nintendo logo effect
   xor A
