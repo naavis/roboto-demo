@@ -8,7 +8,13 @@ How to assemble
 ---------------
 The assembly code is written for [RGBDS assembler](https://github.com/rednex/rgbds). The whole demo can be compiled and tested using the [BGB emulator](http://bgb.bircd.org/) on Windows just by running `run.bat`
 
-The needed RGBDS and BGB executables are contained in the *requirements* directory.
+Project structure
+-----------------
+The starting point of the program is in the file [skrollidemo.z80](skrollidemo.z80). Interrupt boilerplate code can be found in [interrupts.z80](interrupts.z80) file.
+
+The demo is divided into separate scenes, which reside in their respective `scene_*.z80` files.
+
+RGBDS, mod2gbt and BGB executables are contained in the *requirements* directory.
 
 Libraries
 ---------
