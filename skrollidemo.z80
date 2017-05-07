@@ -8,6 +8,7 @@ main:
   ; Don't play music during the Nintendo logo effect
   xor A
   ld [music_playing], A
+
   di ; Disable interrupts while setting them up
   call initialize_interrupts
   ei; Enable interrupts again
@@ -23,6 +24,7 @@ main:
   ; Enable music
   ld A, $1
   ld [music_playing], A
+
   ; Begin showing actual scenes
   call scene_skrolli_logo
   call scene_lissajous
@@ -30,7 +32,6 @@ main:
   call scene_plasma
   call scene_cover
   call scene_credits
-
 
 .loop:
   halt
