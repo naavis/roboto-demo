@@ -3,6 +3,8 @@ Roboto
 Demo compo entry for Skrolli Party 2017,
 programmed in Sharp LR35902 assembly for the original Game Boy (DMG).
 
+The demo running on real Game Boy hardware can be seen on [YouTube](https://youtu.be/WmMDLpUQ0oU).
+
 
 How to assemble
 ---------------
